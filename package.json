@@ -1,0 +1,16 @@
+{
+  "name": "nhlstats",
+  "version": "1.0.0",
+  "description": "Computes and Displays custom NHL Fantasy stats",
+  "main": "src/app.js",
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node src/app.js"
+  },
+  "type": "module",
+  "author": "Cal Trainor",
+  "license": "ISC"
+}
