@@ -1,7 +1,7 @@
 {
   "name": "nhlstats",
   "version": "1.0.0",
-  "description": "Computes and Displays custom NHL Fantasy stats",
+  "description": "Computes custom NHL Fantasy stats",
   "main": "src/app.js",
   "dependencies": {
     "node-fetch": "^2.6.1"
