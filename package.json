@@ -4,6 +4,8 @@
   "description": "Computes custom NHL Fantasy stats",
   "main": "src/app.js",
   "dependencies": {
+    "dotenv": "^10.0.0",
+    "mongodb": "^4.0.0-beta.6",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {},
