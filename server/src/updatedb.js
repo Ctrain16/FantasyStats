@@ -50,7 +50,7 @@ const fetchPlayerStats = async function (player, season) {
   if (data.stats) player.stats = data.stats[0].splits;
   else
     console.log(
-      `[ERROR]: There was an error getting stats for '${player.fullName}'... [RESPONSE MESSAGE]: ${data.message}`
+      `[ERROR]: could not get stats for '${player.fullName}'... [RESPONSE MESSAGE]: ${data.message}`
     );
   return player;
 };
@@ -78,4 +78,7 @@ const updateDb = async function () {
   }
 
   await mongoClient.close();
+  console.log(`[SUCCESS]: Player database was successfully updated`);
 };
+
+export { updateDb };
