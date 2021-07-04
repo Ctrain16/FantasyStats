@@ -14,7 +14,7 @@ const tryCatchForAsync = async function (promise) {
   }
 };
 
-const getPlayers = async function () {
+const fetchPlayers = async function () {
   const [response, error] = await tryCatchForAsync(
     fetch('https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster')
   );
@@ -38,7 +38,7 @@ const getPlayers = async function () {
   return players;
 };
 
-const getPlayersStatsSingleSeason = async function (player, season) {
+const fetchPlayerStats = async function (player, season) {
   const [response, error] = await tryCatchForAsync(
     fetch(`https://statsapi.web.nhl.com/${player.link}/stats?stats=yearByYear`)
   );
@@ -55,26 +55,27 @@ const getPlayersStatsSingleSeason = async function (player, season) {
   return player;
 };
 
-const players = await Promise.all(
-  (
-    await getPlayers()
-  ).map((player) => getPlayersStatsSingleSeason(player, '20202021'))
-);
+const updateDb = async function () {
+  const players = await Promise.all(
+    (await fetchPlayers()).map((player) => fetchPlayerStats(player, '20202021'))
+  );
 
-console.log(players.length);
-console.log(players[0]);
+  const mongoClient = new MongoClient(process.env.MONGO_CONNECTION, {
+    useUnifiedTopology: true,
+  });
+  await mongoClient.connect();
 
-const mongoClient = new MongoClient(process.env.MONGO_CONNECTION, {
-  useUnifiedTopology: true,
-});
-await mongoClient.connect();
-const playersCollection = mongoClient.db('playerdb').collection('player-stats');
+  const playersCollection = mongoClient
+    .db('playerdb')
+    .collection('player-stats');
 
-for (const player of players) {
-  const query = { _id: player.id };
-  const update = { $set: player };
-  const options = { upsert: true };
-  await playersCollection.updateOne(query, update, options);
-}
+  for (const player of players) {
+    await playersCollection.updateOne(
+      { _id: player.id }, // query
+      { $set: player }, // update operation
+      { upsert: true } // options... upsert inserts a document if query doesn't find one
+    );
+  }
 
-await mongoClient.close();
+  await mongoClient.close();
+};
