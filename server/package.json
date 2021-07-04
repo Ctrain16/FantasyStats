@@ -1,0 +1,18 @@
+{
+  "name": "nhlstats",
+  "version": "1.0.0",
+  "description": "Computes custom NHL Fantasy stats",
+  "main": "src/app.js",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "mongodb": "^4.0.0-beta.6",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "updatedb": "node src/updatedb.js"
+  },
+  "type": "module",
+  "author": "Cal Trainor",
+  "license": "ISC"
+}
