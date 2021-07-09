@@ -1,11 +1,10 @@
 <template>
   <div class="home">
-    <h1>Home Page</h1>
     <p v-show="players.length === 0">Fetching players...</p>
     <p v-if="players[0] === 'error'">Error fetching players</p>
-    <div id="player-chart" v-else>
+    <div v-else-if="players.length > 0" id="player-chart">
       <ul id="player-list">
-        <li v-for="(player, i) in players" :key="i">
+        <li v-for="(player, i) in playersOnPage" :key="i">
           {{ player.fullName }}
         </li>
       </ul>
@@ -21,8 +20,18 @@ export default {
   name: 'Home',
   data() {
     return {
-      players: []
+      players: [],
+      page: 1,
+      playersPerPage: 50
     };
+  },
+  computed: {
+    playersOnPage() {
+      return this.players.slice(
+        (this.page - 1) * this.playersPerPage,
+        this.page * this.playersPerPage
+      );
+    }
   },
   async mounted() {
     try {
@@ -34,3 +43,9 @@ export default {
   }
 };
 </script>
+
+<style>
+.home {
+  margin: 10px;
+}
+</style>
