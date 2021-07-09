@@ -1,8 +1,6 @@
 import fetch from 'node-fetch';
 import { MongoClient } from 'mongodb';
 import Player from './player.js';
-import * as dotenv from 'dotenv';
-dotenv.config();
 
 const tryCatchForAsync = async function (promise) {
   try {
