@@ -21,7 +21,14 @@ app.get('/api/players', async (req, res) => {
   const cursor = playersCollection.find({});
   const players = await cursor.toArray();
 
-  res.send(players);
+  res.send(players.filter((player) => player.position !== 'G'));
+});
+
+app.get('/api/goalies', async (req, res) => {
+  const cursor = playersCollection.find({});
+  const players = await cursor.toArray();
+
+  res.send(players.filter((player) => player.position === 'G'));
 });
 
 app.get('/api/updatedb', async (req, res) => {
