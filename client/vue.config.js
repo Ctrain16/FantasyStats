@@ -6,5 +6,11 @@ module.exports = {
         changeOrigin: true
       }
     }
+  },
+  chainWebpack: config => {
+    config.plugin('html').tap(args => {
+      args[0].title = 'CMT Stats';
+      return args;
+    });
   }
 };
