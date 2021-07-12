@@ -45,8 +45,35 @@ const fetchPlayerStats = async function (player, season) {
   const [data, error2] = await tryCatchForAsync(response.json());
   if (error2) return;
 
-  if (data.stats) player.stats = data.stats[0].splits;
-  else
+  if (data.stats) {
+    const stats = data.stats[0].splits;
+
+    for (const [index, { stat }] of stats.entries()) {
+      stats[index].stat = new Map([
+        ['GP', stat.games],
+        ['G', stat.goals],
+        ['A', stat.assists],
+        ['P', stat.points],
+        ['+/-', stat.plusMinus],
+        ['PIM', stat.pim],
+        ['H', stat.hits],
+        ['S', stat.shots],
+        ['S%', stat.shotPct],
+        ['BS', stat.blocked],
+        ['GWG', stat.gameWinningGoals],
+        ['OTG', stat.overTimeGoals],
+        ['PPG', stat.powerPlayGoals],
+        ['PPP', stat.powerPlayPoints],
+        ['SHG', stat.shortHandedGoals],
+        ['SHP', stat.shortHandedPoints],
+        ['TOI', stat.timeOnIce],
+        ['PPTOI', stat.powerPlayTimeOnIce],
+        ['SHTOI', stat.shortHandedTimeOnIce],
+        ['FO%', stat.faceOffPct],
+      ]);
+    }
+    player.stats = stats;
+  } else
     console.log(
       `[ERROR]: could not get stats for '${player.fullName}'... [RESPONSE MESSAGE]: ${data.message}`
     );
