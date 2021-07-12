@@ -70,8 +70,6 @@ export default {
   async mounted() {
     try {
       this.players = await (await fetch('api/players')).json();
-      const x = this.players[0]._stats;
-      console.log(x.slice(-1)[0]);
     } catch (error) {
       this.players.push('error');
       console.error(error);
