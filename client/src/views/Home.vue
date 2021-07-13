@@ -27,7 +27,13 @@
             <td>{{ getSeason(player) }}</td>
             <td>{{ player.position }}</td>
             <td>{{ player.team }}</td>
-            <td v-for="(stat, j) in playerStats(i)" :key="j">{{ stat }}</td>
+            <td
+              v-for="(stat, name, index) in playerStats(i)"
+              :key="name"
+              :class="index === 3 && pageJustLoaded ? 'active-column' : ''"
+            >
+              {{ stat }}
+            </td>
           </tr>
         </tbody>
       </table>
@@ -58,6 +64,7 @@ export default {
       sortColumn: '',
       sortDescending: true,
       lastSortColumnIndex: 0,
+      pageJustLoaded: true,
 
       filters: {
         season: '20202021'
@@ -77,6 +84,8 @@ export default {
     },
 
     selectSortColumn(e) {
+      this.pageJustLoaded = false;
+
       const tableHeaders = document.getElementById('player-stats-table')
         .children[0].children[0].children;
       const sortColumnIndex = [...tableHeaders].findIndex(
@@ -129,17 +138,30 @@ export default {
   },
   async mounted() {
     try {
-      this.players = await (
-        await fetch('api/players', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            season: this.filters.season
+      this.players = (
+        await (
+          await fetch('api/players', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              season: this.filters.season
+            })
           })
-        })
-      ).json();
+        ).json()
+      ).sort((p1, p2) => {
+        const p1stats = String(p1._stats.slice(-1)[0].stat['P']).replace(
+          ':',
+          ''
+        );
+        const p2stats = String(p2._stats.slice(-1)[0].stat['P']).replace(
+          ':',
+          ''
+        );
+
+        return this.sortDescending ? p2stats - p1stats : p1stats - p2stats;
+      });
     } catch (error) {
       this.players.push('error');
       console.error(error);
