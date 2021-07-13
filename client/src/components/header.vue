@@ -21,7 +21,7 @@ export default {
   height: 80px;
 
   color: var(--color-white);
-  background-color: var(--color-blue);
+  background-color: var(--color-lightblue);
 }
 
 .logo {
