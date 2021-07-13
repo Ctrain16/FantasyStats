@@ -22,6 +22,7 @@ export default {
   --color-ivory: #fbfff1;
   --color-blue: #090c9b;
   --color-lightblue: #3590f3;
+  --color-lightbluefaded: #a8d2ff;
 }
 
 * {
