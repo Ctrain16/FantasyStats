@@ -30,7 +30,10 @@
             <td
               v-for="(stat, name, index) in playerStats(i)"
               :key="name"
-              :class="index === 3 && pageJustLoaded ? 'active-column' : ''"
+              :class="{
+                'active-column':
+                  index === 3 && (pageJustLoaded || sortColumn === 'P')
+              }"
             >
               {{ stat }}
             </td>
@@ -61,7 +64,7 @@ export default {
       currentPage: 1,
       playersPerPage: 50,
 
-      sortColumn: '',
+      sortColumn: 'P', // default to sort by points
       sortDescending: true,
       lastSortColumnIndex: 0,
       pageJustLoaded: true,
