@@ -8,6 +8,7 @@
           <tr>
             <th>#</th>
             <th>Player</th>
+            <th>Season</th>
             <th
               v-for="(stat, i) in playerStatCategories"
               :key="i"
@@ -21,6 +22,7 @@
           <tr v-for="(player, i) in playersOnPage" :key="i">
             <td>{{ i + 1 }}</td>
             <td>{{ player.fullName }}</td>
+            <td>{{ getSeason(player) }}</td>
             <td v-for="(stat, j) in playerStats(i)" :key="j">{{ stat }}</td>
           </tr>
         </tbody>
@@ -48,9 +50,14 @@ export default {
       players: [],
       currentPage: 1,
       playersPerPage: 50,
+
       sortColumn: '',
       sortDescending: true,
-      lastSortColumnIndex: 0
+      lastSortColumnIndex: 0,
+
+      filters: {
+        season: '20202021'
+      }
     };
   },
   methods: {
@@ -58,6 +65,11 @@ export default {
       return this.players[
         index + (this.currentPage - 1) * this.playersPerPage
       ]._stats.slice(-1)[0].stat;
+    },
+
+    getSeason(player) {
+      const season = player._stats.slice(-1)[0].season;
+      return `${season.slice(0, 4)}-${season.slice(6)}`;
     },
 
     selectSortColumn(e) {
@@ -113,7 +125,17 @@ export default {
   },
   async mounted() {
     try {
-      this.players = await (await fetch('api/players')).json();
+      this.players = await (
+        await fetch('api/players', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            season: this.filters.season
+          })
+        })
+      ).json();
     } catch (error) {
       this.players.push('error');
       console.error(error);
