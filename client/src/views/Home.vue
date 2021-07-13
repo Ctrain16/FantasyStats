@@ -9,6 +9,8 @@
             <th>#</th>
             <th>Player</th>
             <th>Season</th>
+            <th>Pos</th>
+            <th>Team</th>
             <th
               v-for="(stat, i) in playerStatCategories"
               :key="i"
@@ -23,6 +25,8 @@
             <td>{{ i + 1 }}</td>
             <td>{{ player.fullName }}</td>
             <td>{{ getSeason(player) }}</td>
+            <td>{{ player.position }}</td>
+            <td>{{ player.team }}</td>
             <td v-for="(stat, j) in playerStats(i)" :key="j">{{ stat }}</td>
           </tr>
         </tbody>

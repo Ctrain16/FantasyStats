@@ -1,10 +1,11 @@
 class Player {
-  constructor(player) {
+  constructor(player, team) {
     this._id = player['person']['id'];
     this._link = player['person']['link'];
     this.fullName = player['person']['fullName'];
     this.number = player['jerseyNumber'];
     this.position = player['position']['code'];
+    this.team = team;
   }
 
   set stats(stats) {

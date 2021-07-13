@@ -28,7 +28,7 @@ const fetchPlayers = async function () {
     const rosterJSON = team['roster'];
     if (rosterJSON) {
       rosterJSON['roster'].forEach(function (player) {
-        players.push(new Player(player));
+        players.push(new Player(player, team.abbreviation));
       });
     }
   });
