@@ -77,13 +77,17 @@ const fetchPlayerStats = async function (player, season) {
     console.log(
       `[ERROR]: could not get stats for '${player.fullName}'... [RESPONSE MESSAGE]: ${data.message}`
     );
-  return player;
+  return player.stats && player.stats.length > 0 ? player : null; // remove players where we couldn't get their stats or they haven't played in the NHL, why the NHL API would still include them seems dumb
 };
 
 const updateDb = async function () {
-  const players = await Promise.all(
-    (await fetchPlayers()).map((player) => fetchPlayerStats(player, '20202021'))
-  );
+  const players = (
+    await Promise.all(
+      (
+        await fetchPlayers()
+      ).map((player) => fetchPlayerStats(player, '20202021'))
+    )
+  ).filter((player) => player !== null);
 
   const mongoClient = new MongoClient(process.env.MONGO_CONNECTION, {
     useUnifiedTopology: true,
