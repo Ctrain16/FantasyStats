@@ -5,7 +5,10 @@ class Player {
     this.fullName = player['person']['fullName'];
     this.number = player['jerseyNumber'];
     this.position = player['position']['code'];
-    this.team = team;
+    this.team = {
+      name: team.name,
+      abbreviation: team.abbreviation,
+    };
   }
 
   set stats(stats) {
