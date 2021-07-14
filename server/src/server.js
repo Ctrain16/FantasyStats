@@ -26,25 +26,33 @@ app.post('/api/players', async (req, res) => {
   const players = await cursor.toArray();
 
   res.send(
-    players
-      .filter((player) => player.position !== 'G')
-      .filter((player) => {
-        return player._stats.slice(-1)[0].season === season;
-      })
+    players.filter((player) => {
+      return player._stats.slice(-1)[0].season === season;
+    })
+  );
+});
+
+app.post('/api/skaters', async (req, res) => {
+  const { season } = req.body;
+  const cursor = playersCollection.find({ position: { $ne: 'G' } });
+  const players = await cursor.toArray();
+
+  res.send(
+    players.filter((player) => {
+      return player._stats.slice(-1)[0].season === season;
+    })
   );
 });
 
 app.post('/api/goalies', async (req, res) => {
   const { season } = req.body;
-  const cursor = playersCollection.find({});
+  const cursor = playersCollection.find({ position: { $eq: 'G' } });
   const players = await cursor.toArray();
 
   res.send(
-    players
-      .filter((player) => player.position === 'G')
-      .filter((player) => {
-        return player._stats.slice(-1)[0].season === season;
-      })
+    players.filter((player) => {
+      return player._stats.slice(-1)[0].season === season;
+    })
   );
 });
 
