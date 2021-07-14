@@ -1,6 +1,6 @@
 # NHL Stats
 
-Tool to use to calculate custom stats for my fantasy hockey league.
+Web App that displays my custom fantasy hockey stats.
 
 ## API
 
