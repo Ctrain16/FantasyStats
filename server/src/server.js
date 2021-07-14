@@ -1,5 +1,6 @@
 import express from 'express';
 import * as dotenv from 'dotenv';
+import fetch from 'node-fetch';
 import { MongoClient } from 'mongodb';
 
 dotenv.config();
@@ -44,6 +45,16 @@ app.post('/api/goalies', async (req, res) => {
       .filter((player) => {
         return player._stats.slice(-1)[0].season === season;
       })
+  );
+});
+
+app.get('/api/teams', async (req, res) => {
+  res.send(
+    (
+      await (await fetch('https://statsapi.web.nhl.com/api/v1/teams')).json()
+    ).teams
+      .map((team) => team.name)
+      .sort()
   );
 });
 
