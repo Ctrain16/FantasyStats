@@ -6,9 +6,7 @@
       :id="label"
       @input="this.$emit('update:modelValue', $event.target.value)"
     >
-      <option v-for="option in ['All', ...options]" :key="option">{{
-        option
-      }}</option>
+      <option v-for="option in options" :key="option">{{ option }}</option>
     </select>
   </div>
 </template>
