@@ -183,6 +183,7 @@ export default {
   margin-left: 10vw;
   margin-right: 10vw;
   box-shadow: 0px 4px 8px 0px rgb(182, 182, 182);
+  border: 1px solid var(--color-lightblue);
 }
 
 #player-stats-table {
@@ -194,9 +195,12 @@ export default {
 
 #player-stats-table td,
 #player-stats-table th {
-  border: 1px solid #ddd;
   padding: 8px;
   white-space: nowrap;
+}
+
+#player-stats-table td {
+  border: 1px solid #ddd;
 }
 
 #player-stats-table tr:nth-child(even) {
