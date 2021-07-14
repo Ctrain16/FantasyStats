@@ -1,5 +1,14 @@
 <template>
   <div class="home">
+    <div class="filters">
+      <Filter
+        :label="'Position'"
+        :options="positions"
+        v-model="filters.position"
+      ></Filter>
+      <Filter :label="'Team'" :options="teams" v-model="filters.team"></Filter>
+    </div>
+
     <p v-show="players.length === 0">Fetching players...</p>
     <p v-if="players[0] === 'error'">Error fetching players</p>
     <div v-else-if="players.length > 0" id="player-chart">
@@ -26,7 +35,7 @@
             <td>{{ player.fullName }}</td>
             <td>{{ getSeason(player) }}</td>
             <td>{{ player.position }}</td>
-            <td>{{ player.team }}</td>
+            <td>{{ player.team.abbreviation }}</td>
             <td
               v-for="(stat, name, index) in playerStats(i)"
               :key="name"
@@ -56,11 +65,17 @@
 </template>
 
 <script>
+import Filter from '../components/filter.vue';
+
 export default {
   name: 'Home',
+  components: { Filter },
   data() {
     return {
       players: [],
+      teams: [],
+      positions: ['C', 'L', 'R', 'D', 'G'],
+
       currentPage: 1,
       playersPerPage: 50,
 
@@ -70,15 +85,33 @@ export default {
       pageJustLoaded: true,
 
       filters: {
-        season: '20202021'
+        season: '20202021',
+        team: 'All',
+        position: 'All'
       }
     };
   },
   methods: {
     playerStats(index) {
-      return this.players[
+      return this.filterPlayers(this.players)[
         index + (this.currentPage - 1) * this.playersPerPage
       ]._stats.slice(-1)[0].stat;
+    },
+
+    filterPlayers(players) {
+      return players.filter(player => {
+        if (this.filters.team !== 'All' && this.filters.position !== 'All') {
+          return (
+            player.team.name === this.filters.team &&
+            player.position === this.filters.position
+          );
+        } else if (this.filters.team !== 'All') {
+          return player.team.name === this.filters.team;
+        } else if (this.filters.position !== 'All') {
+          return player.position === this.filters.position;
+        }
+        return player;
+      });
     },
 
     getSeason(player) {
@@ -121,7 +154,7 @@ export default {
   },
   computed: {
     playersOnPage() {
-      return this.players.slice(
+      return this.filterPlayers(this.players).slice(
         (this.currentPage - 1) * this.playersPerPage,
         this.currentPage * this.playersPerPage
       );
@@ -135,7 +168,11 @@ export default {
 
     numberOfPages() {
       return Array.from(
-        Array(Math.ceil(this.players.length / this.playersPerPage)).keys()
+        Array(
+          Math.ceil(
+            this.filterPlayers(this.players).length / this.playersPerPage
+          )
+        ).keys()
       );
     }
   },
@@ -162,9 +199,9 @@ export default {
           ':',
           ''
         );
-
         return this.sortDescending ? p2stats - p1stats : p1stats - p2stats;
       });
+      this.teams = [...(await (await fetch('api/teams')).json())];
     } catch (error) {
       this.players.push('error');
       console.error(error);
@@ -176,18 +213,17 @@ export default {
 <style>
 .home {
   margin: 10px;
+  margin-left: 10vw;
+  margin-right: 10vw;
 }
 
 #player-chart {
   overflow-x: auto;
-  margin-left: 10vw;
-  margin-right: 10vw;
   box-shadow: 0px 4px 8px 0px rgb(182, 182, 182);
   border: 1px solid var(--color-lightblue);
 }
 
 #player-stats-table {
-  font-family: Arial, Helvetica, sans-serif;
   border-collapse: collapse;
   width: 100%;
   max-width: 80vw;
@@ -249,5 +285,9 @@ export default {
 .pagination a:hover:not(.active) {
   background-color: #ddd;
   border-radius: 5px;
+}
+
+.filters {
+  display: flex;
 }
 </style>
