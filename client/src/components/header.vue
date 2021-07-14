@@ -22,6 +22,7 @@ export default {
 
   color: var(--color-white);
   background-color: var(--color-lightblue);
+  box-shadow: 0px 4px 8px 0px rgb(182, 182, 182);
 }
 
 .logo {
