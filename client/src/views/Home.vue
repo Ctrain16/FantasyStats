@@ -9,9 +9,9 @@
       <Filter :label="'Team'" :options="teams" v-model="filters.team"></Filter>
     </div>
 
-    <p v-show="players.length === 0">Fetching players...</p>
-    <p v-if="players[0] === 'error'">Error fetching players</p>
-    <div v-else-if="players.length > 0" id="player-chart">
+    <p v-show="skaters.length === 0">Fetching skaters...</p>
+    <p v-if="skaters[0] === 'error'">Error fetching skaters</p>
+    <div v-else-if="skaters.length > 0" id="player-chart">
       <table id="player-stats-table">
         <thead>
           <tr>
@@ -73,8 +73,9 @@ export default {
   data() {
     return {
       players: [],
+      skaters: [],
       teams: [],
-      positions: ['C', 'L', 'R', 'D', 'G'],
+      positions: ['Skaters', 'C', 'L', 'R', 'D', 'G'],
 
       currentPage: 1,
       playersPerPage: 50,
@@ -87,30 +88,35 @@ export default {
       filters: {
         season: '20202021',
         team: 'All',
-        position: 'All'
+        position: 'Skaters'
       }
     };
   },
   methods: {
     playerStats(index) {
-      return this.filterPlayers(this.players)[
+      return this.filterPlayers(this.skaters)[
         index + (this.currentPage - 1) * this.playersPerPage
       ]._stats.slice(-1)[0].stat;
     },
 
-    filterPlayers(players) {
-      return players.filter(player => {
-        if (this.filters.team !== 'All' && this.filters.position !== 'All') {
+    filterPlayers(skaters) {
+      return skaters.filter(player => {
+        if (
+          this.filters.team !== 'All' &&
+          this.filters.position !== 'Skaters'
+        ) {
           return (
             player.team.name === this.filters.team &&
             player.position === this.filters.position
           );
         } else if (this.filters.team !== 'All') {
-          return player.team.name === this.filters.team;
-        } else if (this.filters.position !== 'All') {
+          return (
+            player.team.name === this.filters.team && player.position !== 'G'
+          );
+        } else if (this.filters.position !== 'Skaters') {
           return player.position === this.filters.position;
         }
-        return player;
+        return player.position !== 'G';
       });
     },
 
@@ -140,7 +146,7 @@ export default {
         this.sortColumn === e.target.textContent ? !this.sortDescending : true;
       this.sortColumn = e.target.textContent;
       this.currentPage = 1;
-      this.players = this.players.sort((p1, p2) => {
+      this.skaters = this.skaters.sort((p1, p2) => {
         const p1stats = String(
           p1._stats.slice(-1)[0].stat[this.sortColumn]
         ).replace(':', '');
@@ -154,7 +160,7 @@ export default {
   },
   computed: {
     playersOnPage() {
-      return this.filterPlayers(this.players).slice(
+      return this.filterPlayers(this.skaters).slice(
         (this.currentPage - 1) * this.playersPerPage,
         this.currentPage * this.playersPerPage
       );
@@ -162,15 +168,15 @@ export default {
 
     playerStatCategories() {
       const index = 0;
-      while (this.players[index].position === 'G') index++;
-      return Object.keys(this.players[index]._stats.slice(-1)[0].stat);
+      while (this.skaters[index].position === 'G') index++;
+      return Object.keys(this.skaters[index]._stats.slice(-1)[0].stat);
     },
 
     numberOfPages() {
       return Array.from(
         Array(
           Math.ceil(
-            this.filterPlayers(this.players).length / this.playersPerPage
+            this.filterPlayers(this.skaters).length / this.playersPerPage
           )
         ).keys()
       );
@@ -178,9 +184,22 @@ export default {
   },
   async mounted() {
     try {
-      this.players = (
+      this.teams = ['All', ...(await (await fetch('api/teams')).json())];
+      this.players = await (
+        await fetch('api/players', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            season: this.filters.season
+          })
+        })
+      ).json();
+
+      this.skaters = (
         await (
-          await fetch('api/players', {
+          await fetch('api/skaters', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -201,9 +220,8 @@ export default {
         );
         return this.sortDescending ? p2stats - p1stats : p1stats - p2stats;
       });
-      this.teams = [...(await (await fetch('api/teams')).json())];
     } catch (error) {
-      this.players.push('error');
+      this.skaters.push('error');
       console.error(error);
     }
   }
