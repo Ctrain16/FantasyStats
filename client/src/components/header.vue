@@ -26,12 +26,6 @@ export default {
   margin: 10px;
   width: 200px;
   height: 58px;
-
-  font-family: 'Aquire';
-}
-
-.test {
-  font-family: 'Aquire';
 }
 
 .searchbox {
