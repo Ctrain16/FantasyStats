@@ -1,10 +1,38 @@
 <template>
-  <input class="searchbox" placeholder="Search for player..." />
+  <input
+    class="searchbox"
+    placeholder="Search for player..."
+    @input="searchForPlayer($event.target.value)"
+  />
 </template>
 
 <script>
 export default {
-  name: 'SearchBox'
+  name: 'SearchBox',
+  data() {
+    return {
+      players: []
+    };
+  },
+  methods: {
+    searchForPlayer(input) {
+      const results = this.players
+        .filter(player =>
+          player.fullName.toLowerCase().startsWith(input.toLowerCase())
+        )
+        .slice(0, 5);
+    }
+  },
+  async mounted() {
+    this.players = await (
+      await fetch('api/players', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+    ).json();
+  }
 };
 </script>
 
