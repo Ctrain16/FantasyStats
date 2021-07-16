@@ -32,4 +32,15 @@ export default {
   padding: 0;
   box-sizing: inherit;
 }
+
+@font-face {
+  font-family: 'Aquire';
+  src: local('Aquire'), url(/fonts/Aquire/Aquire-BW0ox.otf) format('opentype');
+}
+
+@font-face {
+  font-family: 'AquireLight';
+  src: local('AquireLight'),
+    url(/fonts/Aquire/AquireLight-YzE0o.otf) format('opentype');
+}
 </style>
