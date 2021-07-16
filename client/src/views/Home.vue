@@ -31,7 +31,7 @@
         </thead>
         <tbody>
           <tr v-for="(player, i) in playersOnPage" :key="i">
-            <td>{{ i + 1 }}</td>
+            <td>{{ i + 1 + (currentPage - 1) * playersPerPage }}</td>
             <td>{{ player.fullName }}</td>
             <td>{{ getSeason(player) }}</td>
             <td>{{ player.position }}</td>
