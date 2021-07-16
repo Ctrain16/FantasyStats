@@ -26,9 +26,11 @@ app.post('/api/players', async (req, res) => {
   const players = await cursor.toArray();
 
   res.send(
-    players.filter((player) => {
-      return player._stats.slice(-1)[0].season === season;
-    })
+    season
+      ? players.filter((player) => {
+          return player._stats.slice(-1)[0].season === season;
+        })
+      : players
   );
 });
 
