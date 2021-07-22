@@ -150,16 +150,29 @@ export default {
         this.sortColumn === e.target.textContent ? !this.sortDescending : true;
       this.sortColumn = e.target.textContent;
       this.currentPage = 1;
-      this.skaters = this.skaters.sort((p1, p2) => {
-        const p1stats = String(
-          p1._stats.slice(-1)[0].stat[this.sortColumn]
-        ).replace(':', '');
-        const p2stats = String(
-          p2._stats.slice(-1)[0].stat[this.sortColumn]
-        ).replace(':', '');
+      if (this.filters.position === 'G') {
+        this.goalies = this.goalies.sort((p1, p2) => {
+          const p1stats = String(
+            p1._stats.slice(-1)[0].stat[this.sortColumn]
+          ).replace(':', '');
+          const p2stats = String(
+            p2._stats.slice(-1)[0].stat[this.sortColumn]
+          ).replace(':', '');
 
-        return this.sortDescending ? p2stats - p1stats : p1stats - p2stats;
-      });
+          return this.sortDescending ? p2stats - p1stats : p1stats - p2stats;
+        });
+      } else {
+        this.skaters = this.skaters.sort((p1, p2) => {
+          const p1stats = String(
+            p1._stats.slice(-1)[0].stat[this.sortColumn]
+          ).replace(':', '');
+          const p2stats = String(
+            p2._stats.slice(-1)[0].stat[this.sortColumn]
+          ).replace(':', '');
+
+          return this.sortDescending ? p2stats - p1stats : p1stats - p2stats;
+        });
+      }
     }
   },
   computed: {
@@ -173,10 +186,7 @@ export default {
     playerStatCategories() {
       if (this.filters.position !== 'G')
         return Object.keys(this.skaters[0]._stats.slice(-1)[0].stat);
-      else {
-        console.log(this.goalies[0]);
-        return Object.keys(this.goalies[0]._stats.slice(-1)[0].stat);
-      }
+      else return Object.keys(this.goalies[0]._stats.slice(-1)[0].stat);
     },
 
     numberOfPages() {
