@@ -72,7 +72,7 @@ export default {
   components: { Filter },
   data() {
     return {
-      players: [],
+      goalies: [],
       skaters: [],
       teams: [],
       positions: ['Skaters', 'C', 'L', 'R', 'D', 'G'],
@@ -100,6 +100,10 @@ export default {
     },
 
     filterPlayers(skaters) {
+      if (this.filters.position === 'G') {
+        return this.goalies;
+      }
+
       return skaters.filter(player => {
         if (
           this.filters.team !== 'All' &&
@@ -167,9 +171,12 @@ export default {
     },
 
     playerStatCategories() {
-      const index = 0;
-      while (this.skaters[index].position === 'G') index++;
-      return Object.keys(this.skaters[index]._stats.slice(-1)[0].stat);
+      if (this.filters.position !== 'G')
+        return Object.keys(this.skaters[0]._stats.slice(-1)[0].stat);
+      else {
+        console.log(this.goalies[0]);
+        return Object.keys(this.goalies[0]._stats.slice(-1)[0].stat);
+      }
     },
 
     numberOfPages() {
@@ -185,8 +192,8 @@ export default {
   async mounted() {
     try {
       this.teams = ['All', ...(await (await fetch('api/teams')).json())];
-      this.players = await (
-        await fetch('api/players', {
+      this.goalies = await (
+        await fetch('api/goalies', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
