@@ -67,7 +67,7 @@ const formatSkaterStats = function (stats) {
       ['PIM', stat.pim],
       ['H', stat.hits],
       ['S', stat.shots],
-      ['S%', stat.shotPct],
+      ['S%', Number(stat.shotPct).toFixed(1)],
       ['BS', stat.blocked],
       ['GWG', stat.gameWinningGoals],
       ['OTG', stat.overTimeGoals],
@@ -78,7 +78,7 @@ const formatSkaterStats = function (stats) {
       ['TOI', stat.timeOnIce],
       ['PPTOI', stat.powerPlayTimeOnIce],
       ['SHTOI', stat.shortHandedTimeOnIce],
-      ['FO%', stat.faceOffPct],
+      ['FO%', Number(stat.faceOffPct).toFixed(1)],
     ]);
   }
 
@@ -94,8 +94,8 @@ const formatGoalieStats = function (stats) {
       ['L', stat.losses],
       ['T/OT', stat.ot + stat.ties],
       ['SO', stat.shutouts],
-      ['SV%', stat.savePercentage],
-      ['GAA', stat.goalAgainstAverage],
+      ['SV%', String(Number(stat.savePercentage).toFixed(3)).slice(1)],
+      ['GAA', Number(stat.goalAgainstAverage).toFixed(2)],
       ['GA', stat.goalsAgainst],
       ['SA', stat.shotsAgainst],
       ['SV', stat.saves],
