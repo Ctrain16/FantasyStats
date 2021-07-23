@@ -10,6 +10,26 @@ export default {
   name: 'Player',
   props: {
     id: String
+  },
+  data() {
+    return {
+      player: {}
+    };
+  },
+  async mounted() {
+    console.log('test');
+    this.player = await (
+      await fetch('api/player', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: this.id
+        })
+      })
+    ).json();
+    console.log(this.player);
   }
 };
 </script>
