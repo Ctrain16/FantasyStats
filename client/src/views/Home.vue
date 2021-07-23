@@ -30,7 +30,11 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(player, i) in playersOnPage" :key="i">
+          <tr
+            v-for="(player, i) in playersOnPage"
+            :key="i"
+            @click="this.$router.push(`/player/${player._id}`)"
+          >
             <td>{{ i + 1 + (currentPage - 1) * playersPerPage }}</td>
             <td>{{ player.fullName }}</td>
             <td>{{ getSeason(player) }}</td>
