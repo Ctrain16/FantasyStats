@@ -284,6 +284,7 @@ export default {
 
 #player-stats-table tr:hover {
   background-color: #ddd;
+  cursor: pointer;
 }
 
 #player-stats-table th {
