@@ -58,6 +58,11 @@ app.post('/api/goalies', async (req, res) => {
   );
 });
 
+app.post('/api/player', async (req, res) => {
+  const { id } = req.body;
+  res.send(await playersCollection.findOne({ _id: Number(id) }));
+});
+
 app.get('/api/teams', async (req, res) => {
   res.send(
     (
