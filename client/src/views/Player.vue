@@ -1,7 +1,17 @@
 <template>
-  <div class="player">
-    <h1>Player</h1>
-    <h2>{{ id }}</h2>
+  <div class="player" v-if="player.fullName">
+    <h3>{{ player.fullName }}</h3>
+    <p><b>Team:</b> {{ player.team.name }}</p>
+    <p><b>Position:</b> {{ player.position }}</p>
+    <p><b>Number:</b> {{ player.number }}</p>
+
+    <table>
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div v-else>
+    <p>Loading...</p>
   </div>
 </template>
 
