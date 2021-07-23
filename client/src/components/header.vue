@@ -1,6 +1,8 @@
 <template>
   <div class="header">
-    <img class="logo" src="@/assets/logo.svg" />
+    <router-link to="/">
+      <img class="logo" src="@/assets/logo.svg" />
+    </router-link>
     <SearchBox></SearchBox>
   </div>
 </template>
