@@ -17,7 +17,6 @@ export default {
     };
   },
   async mounted() {
-    console.log('test');
     this.player = await (
       await fetch('api/player', {
         method: 'POST',
@@ -29,7 +28,6 @@ export default {
         })
       })
     ).json();
-    console.log(this.player);
   }
 };
 </script>
