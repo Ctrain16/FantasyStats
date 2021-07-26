@@ -98,17 +98,21 @@ export default {
   },
   methods: {
     playerStats(index) {
-      return this.filterPlayers(this.skaters)[
+      return this.filterPlayers()[
         index + (this.currentPage - 1) * this.playersPerPage
       ]._stats.slice(-1)[0].stat;
     },
 
-    filterPlayers(skaters) {
+    filterPlayers() {
       if (this.filters.position === 'G') {
-        return this.goalies;
+        return this.goalies.filter(goalie => {
+          if (this.filters.team !== 'All')
+            return goalie.team.name === this.filters.team;
+          return goalie;
+        });
       }
 
-      return skaters.filter(player => {
+      return this.skaters.filter(player => {
         if (
           this.filters.team !== 'All' &&
           this.filters.position !== 'Skaters'
@@ -181,7 +185,7 @@ export default {
   },
   computed: {
     playersOnPage() {
-      return this.filterPlayers(this.skaters).slice(
+      return this.filterPlayers().slice(
         (this.currentPage - 1) * this.playersPerPage,
         this.currentPage * this.playersPerPage
       );
@@ -196,9 +200,7 @@ export default {
     numberOfPages() {
       return Array.from(
         Array(
-          Math.ceil(
-            this.filterPlayers(this.skaters).length / this.playersPerPage
-          )
+          Math.ceil(this.filterPlayers().length / this.playersPerPage)
         ).keys()
       );
     }
