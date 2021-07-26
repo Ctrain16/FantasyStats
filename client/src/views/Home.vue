@@ -258,7 +258,7 @@ export default {
 
 #player-chart {
   overflow-x: auto;
-  width: fit-content;
+  max-width: fit-content;
   box-shadow: 0px 4px 8px 0px rgb(182, 182, 182);
   border: 1px solid var(--color-lightblue);
 }
