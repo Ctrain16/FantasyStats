@@ -1,17 +1,22 @@
 <template>
-  <div>
-    <Header></Header>
-    <router-view />
+  <div class="page-container">
+    <div class="content-wrap">
+      <Header></Header>
+      <router-view />
+    </div>
+    <Footer></Footer>
   </div>
 </template>
 
 <script>
 import Header from './components/header.vue';
+import Footer from './components/footer.vue';
 
 export default {
   name: 'App',
   components: {
-    Header
+    Header,
+    Footer
   }
 };
 </script>
@@ -42,5 +47,14 @@ export default {
   font-family: 'AquireLight';
   src: local('AquireLight'),
     url(/fonts/Aquire/AquireLight-YzE0o.otf) format('opentype');
+}
+
+.page-container {
+  position: relative;
+  min-height: 100vh;
+}
+
+.content-wrap {
+  padding-bottom: 7vh;
 }
 </style>
