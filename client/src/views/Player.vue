@@ -47,6 +47,20 @@ export default {
   methods: {
     formatSeason(season) {
       return `${season.slice(0, 4)}-${season.slice(6)}`;
+    },
+
+    async updatePlayer() {
+      this.player = await (
+        await fetch('api/player', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            id: this.id
+          })
+        })
+      ).json();
     }
   },
   computed: {
@@ -55,17 +69,10 @@ export default {
     }
   },
   async mounted() {
-    this.player = await (
-      await fetch('api/player', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          id: this.id
-        })
-      })
-    ).json();
+    this.updatePlayer();
+  },
+  async updated() {
+    this.updatePlayer();
   }
 };
 </script>
