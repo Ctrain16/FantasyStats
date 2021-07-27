@@ -34,7 +34,7 @@ export default {
 footer {
   color: var(--color-blue);
   background-color: var(--color-ivory);
-  border-top: solid 1px black;
+  border-top: solid 1px var(--color-blue);
 
   display: flex;
   align-items: center;
