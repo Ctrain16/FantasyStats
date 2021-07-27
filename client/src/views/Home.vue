@@ -309,7 +309,6 @@ export default {
   min-width: fit-content;
 
   padding-top: 2vh;
-  padding-bottom: 5vh;
 }
 
 .page-button {
