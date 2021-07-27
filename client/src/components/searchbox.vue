@@ -46,7 +46,7 @@ export default {
       }
 
       if (this.searchResults.length === 0) this.searchFocus = -1;
-      else if (this.maxResults > this.searchResults.length)
+      else if (this.searchFocus > this.searchResults.length)
         this.searchFocus = this.searchResults.length - 1;
     },
 
