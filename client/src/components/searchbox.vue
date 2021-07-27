@@ -1,16 +1,20 @@
 <template>
-  <form class="search-suggestion" @submit="submit()">
+  <form class="search-suggestion" @submit="submit($event)">
     <input
       class="searchbox"
       placeholder="Search for player..."
       v-model="search"
       @input="searchForPlayer()"
+      @keyup="handleKeyInput($event.keyCode)"
     />
     <div v-if="searchResults.length > 0" class="search-suggestion-items">
       <div
         v-for="(player, i) in searchResults"
         :key="i"
         @click="clickPlayer(player._id)"
+        :class="{
+          'search-suggestion-active': searchFocus === i
+        }"
       >
         <p>{{ player.fullName }}</p>
       </div>
@@ -25,7 +29,9 @@ export default {
     return {
       players: [],
       search: '',
-      searchResults: []
+      searchFocus: -1,
+      searchResults: [],
+      maxResults: 5
     };
   },
   methods: {
@@ -36,18 +42,44 @@ export default {
           .filter(player =>
             player.fullName.toLowerCase().startsWith(this.search.toLowerCase())
           )
-          .slice(0, 5);
+          .slice(0, this.maxResults);
       }
+      if (this.searchResults.length === 0) this.searchFocus = -1;
+      else if (this.maxResults > this.searchResults.length)
+        this.searchFocus = this.searchResults.length - 1;
+      console.log(this.searchFocus);
     },
 
     clickPlayer(playerID) {
       this.searchResults = [];
+      this.searchFocus = -1;
+      this.search = '';
       this.$router.push(`/player/${playerID}`);
     },
 
-    submit() {
-      if (this.searchResults.length > 0)
+    submit(e) {
+      e.preventDefault();
+      if (this.searchResults.length > 0 && this.searchFocus !== -1)
+        this.clickPlayer(this.searchResults[this.searchFocus]._id);
+      else if (this.searchResults.length > 0)
         this.clickPlayer(this.searchResults[0]._id);
+    },
+
+    handleKeyInput(keyCode) {
+      if (
+        keyCode === 40 &&
+        this.searchFocus ===
+          Math.min(this.maxResults, this.searchResults.length) - 1
+      ) {
+        this.searchFocus = 0;
+      } else if (keyCode === 40) {
+        this.searchFocus++;
+      } else if (keyCode === 38 && this.searchFocus <= 0) {
+        this.searchFocus =
+          Math.min(this.maxResults, this.searchResults.length) - 1;
+      } else if (keyCode === 38) {
+        this.searchFocus--;
+      }
     }
   },
   async mounted() {
