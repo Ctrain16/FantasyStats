@@ -44,10 +44,10 @@ export default {
           )
           .slice(0, this.maxResults);
       }
+
       if (this.searchResults.length === 0) this.searchFocus = -1;
       else if (this.maxResults > this.searchResults.length)
         this.searchFocus = this.searchResults.length - 1;
-      console.log(this.searchFocus);
     },
 
     clickPlayer(playerID) {
