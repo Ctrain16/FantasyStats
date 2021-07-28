@@ -12,8 +12,8 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "SET NODE_ENV=production node src/server.js",
-    "dev": "SET NODE_ENV=development & nodemon src/server.js",
+    "start": "SET NODE_ENV=production& node src/server.js",
+    "dev": "SET NODE_ENV=development& nodemon src/server.js",
     "updatedb": "node src/updatedb.js"
   },
   "type": "module",
