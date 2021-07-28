@@ -1,3 +1,4 @@
+import path from 'path';
 import express from 'express';
 import * as dotenv from 'dotenv';
 import fetch from 'node-fetch';
@@ -9,6 +10,8 @@ import { updateDb } from './updatedb.js';
 
 const app = express();
 app.use(express.json());
+if (process.env.NODE_ENV === 'production')
+  app.use(express.static(path.join(path.resolve(), '../client/dist')));
 
 const mongoClient = new MongoClient(process.env.MONGO_CONNECTION, {
   useUnifiedTopology: true,
@@ -17,7 +20,7 @@ await mongoClient.connect();
 const playersCollection = mongoClient.db('playerdb').collection('player-stats');
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.sendFile(path.join(path.resolve(), '../client/dist/index.html'));
 });
 
 app.post('/api/players', async (req, res) => {
