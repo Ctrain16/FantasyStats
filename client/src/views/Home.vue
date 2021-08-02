@@ -207,32 +207,12 @@ export default {
   },
   async mounted() {
     try {
-      this.teams = ['All', ...(await (await fetch('api/teams')).json())];
-      this.goalies = await (
-        await fetch('api/goalies', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            season: this.filters.season
-          })
-        })
-      ).json();
+      if (this.$store.state.players.length === 0)
+        await this.$store.dispatch('initialize');
 
-      this.skaters = (
-        await (
-          await fetch('api/skaters', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              season: this.filters.season
-            })
-          })
-        ).json()
-      ).sort((p1, p2) => {
+      this.teams = ['All', ...(await (await fetch('api/teams')).json())];
+      this.goalies = this.$store.getters.goalies;
+      this.skaters = this.$store.getters.skaters.sort((p1, p2) => {
         const p1stats = String(p1._stats.slice(-1)[0].stat['P']).replace(
           ':',
           ''

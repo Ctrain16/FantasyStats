@@ -83,14 +83,7 @@ export default {
     }
   },
   async mounted() {
-    this.players = await (
-      await fetch('api/players', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-    ).json();
+    this.players = this.$store.state.players;
   }
 };
 </script>
