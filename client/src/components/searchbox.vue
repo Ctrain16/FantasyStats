@@ -27,7 +27,7 @@ export default {
   name: 'SearchBox',
   data() {
     return {
-      players: [],
+      players: this.$store.state.players,
       search: '',
       searchFocus: -1,
       searchResults: [],
@@ -81,9 +81,6 @@ export default {
         this.searchFocus--;
       }
     }
-  },
-  async mounted() {
-    this.players = this.$store.state.players;
   }
 };
 </script>

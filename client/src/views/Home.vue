@@ -207,10 +207,7 @@ export default {
   },
   async mounted() {
     try {
-      if (this.$store.state.players.length === 0)
-        await this.$store.dispatch('initialize');
-
-      this.teams = ['All', ...(await (await fetch('api/teams')).json())];
+      this.teams = ['All', ...this.$store.state.teams];
       this.goalies = this.$store.getters.goalies;
       this.skaters = this.$store.getters.skaters.sort((p1, p2) => {
         const p1stats = String(p1._stats.slice(-1)[0].stat['P']).replace(

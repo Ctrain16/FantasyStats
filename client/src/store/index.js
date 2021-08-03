@@ -2,7 +2,8 @@ import { createStore } from 'vuex';
 
 export default createStore({
   state: {
-    players: []
+    players: [],
+    teams: []
   },
   getters: {
     goalies: state => {
@@ -15,6 +16,9 @@ export default createStore({
   mutations: {
     setPlayers(state, players) {
       state.players = players;
+    },
+    setTeams(state, teams) {
+      state.teams = teams;
     }
   },
   actions: {
@@ -27,6 +31,8 @@ export default createStore({
           }
         })
       ).json();
+      const teams = await (await fetch('api/teams')).json();
+      commit('setTeams', teams);
       commit('setPlayers', players);
     }
   },
