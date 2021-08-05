@@ -1,0 +1,1 @@
+ssh -i ~/.ssh/aws-keys.pem ubuntu@ctrainstudios.com './updateFantasyStats'
