@@ -71,8 +71,10 @@ export default {
   async mounted() {
     this.updatePlayer();
   },
-  async updated() {
-    this.updatePlayer();
+  watch: {
+    id: function(newVal, oldVal) {
+      this.updatePlayer();
+    }
   }
 };
 </script>
