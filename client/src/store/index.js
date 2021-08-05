@@ -28,7 +28,10 @@ export default createStore({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
-          }
+          },
+          body: JSON.stringify({
+            season: '20202021'
+          })
         })
       ).json();
       const teams = await (await fetch('api/teams')).json();
