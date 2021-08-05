@@ -1,5 +1,6 @@
 <template>
   <div class="page-container">
+    <p>Hello</p>
     <div class="content-wrap">
       <Header></Header>
       <router-view />
