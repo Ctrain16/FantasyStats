@@ -8,9 +8,9 @@ const fantasyPointValues = {
   shot: 0.5,
   ppp: 1,
   ga: -1,
-  sv: 0.25,
+  save: 0.25,
   so: 5,
-  w: 5,
+  win: 5,
 };
 
 const calcPlayerFPPG = function (stats) {
@@ -28,4 +28,16 @@ const calcPlayerFPPG = function (stats) {
   return fppg;
 };
 
-export { calcPlayerFPPG };
+const calcGoalieFPPG = function (stats) {
+  return (
+    ((stats.assists ?? 0) * fantasyPointValues.assist +
+      (stats.pim ?? 0) * fantasyPointValues.pim +
+      (stats.goalsAgainst ?? 0) * fantasyPointValues.ga +
+      (stats.saves ?? 0) * fantasyPointValues.save +
+      (stats.shutouts ?? 0) * fantasyPointValues.so +
+      (stats.wins ?? 0) * fantasyPointValues.win) /
+    stats.games
+  );
+};
+
+export { calcPlayerFPPG, calcGoalieFPPG };

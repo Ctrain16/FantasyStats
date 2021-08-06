@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import { MongoClient } from 'mongodb';
 import Player from './player.js';
-import { calcPlayerFPPG } from './advancedstats.js';
+import { calcPlayerFPPG, calcGoalieFPPG } from './advancedstats.js';
 
 const tryCatchForAsync = async function (promise) {
   try {
@@ -102,6 +102,7 @@ const formatGoalieStats = function (stats) {
       ['SA', stat.shotsAgainst],
       ['SV', stat.saves],
       ['TOI', stat.timeOnIce],
+      ['FPPG', Number(calcGoalieFPPG(stat)).toFixed(2)],
     ]);
   }
 
