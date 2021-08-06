@@ -13,30 +13,36 @@ const fantasyPointValues = {
   win: 5,
 };
 
-const calcSkaterFPPG = function (stats) {
-  return (
-    ((stats.goals ?? 0) * fantasyPointValues.goal +
-      (stats.assists ?? 0) * fantasyPointValues.assist +
-      (stats.hits ?? 0) * fantasyPointValues.hit +
-      (stats.pim ?? 0) * fantasyPointValues.pim +
-      (stats.plusMinus ?? 0) * fantasyPointValues.plusMinus +
-      (stats.shortHandedGoals ?? 0) * fantasyPointValues.shg +
-      (stats.shots ?? 0) * fantasyPointValues.shot +
-      (stats.powerPlayPoints ?? 0) * fantasyPointValues.ppp) /
-    stats.games
-  );
+const calcSkaterAdvancedStats = function (stats) {
+  const totalFantasyPoints =
+    (stats.goals ?? 0) * fantasyPointValues.goal +
+    (stats.assists ?? 0) * fantasyPointValues.assist +
+    (stats.hits ?? 0) * fantasyPointValues.hit +
+    (stats.pim ?? 0) * fantasyPointValues.pim +
+    (stats.plusMinus ?? 0) * fantasyPointValues.plusMinus +
+    (stats.shortHandedGoals ?? 0) * fantasyPointValues.shg +
+    (stats.shots ?? 0) * fantasyPointValues.shot +
+    (stats.powerPlayPoints ?? 0) * fantasyPointValues.ppp;
+
+  return {
+    Fpts: totalFantasyPoints,
+    FPPG: totalFantasyPoints / stats.games,
+  };
 };
 
-const calcGoalieFPPG = function (stats) {
-  return (
-    ((stats.assists ?? 0) * fantasyPointValues.assist +
-      (stats.pim ?? 0) * fantasyPointValues.pim +
-      (stats.goalsAgainst ?? 0) * fantasyPointValues.ga +
-      (stats.saves ?? 0) * fantasyPointValues.save +
-      (stats.shutouts ?? 0) * fantasyPointValues.so +
-      (stats.wins ?? 0) * fantasyPointValues.win) /
-    stats.games
-  );
+const calcGoalieAdvancedStats = function (stats) {
+  const totalFantasyPoints =
+    (stats.assists ?? 0) * fantasyPointValues.assist +
+    (stats.pim ?? 0) * fantasyPointValues.pim +
+    (stats.goalsAgainst ?? 0) * fantasyPointValues.ga +
+    (stats.saves ?? 0) * fantasyPointValues.save +
+    (stats.shutouts ?? 0) * fantasyPointValues.so +
+    (stats.wins ?? 0) * fantasyPointValues.win;
+
+  return {
+    Fpts: totalFantasyPoints,
+    FPPG: totalFantasyPoints / stats.games,
+  };
 };
 
-export { calcSkaterFPPG, calcGoalieFPPG };
+export { calcSkaterAdvancedStats, calcGoalieAdvancedStats };

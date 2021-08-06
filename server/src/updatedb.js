@@ -1,7 +1,10 @@
 import fetch from 'node-fetch';
 import { MongoClient } from 'mongodb';
 import Player from './player.js';
-import { calcSkaterFPPG, calcGoalieFPPG } from './advancedstats.js';
+import {
+  calcSkaterAdvancedStats,
+  calcGoalieAdvancedStats,
+} from './advancedstats.js';
 
 const tryCatchForAsync = async function (promise) {
   try {
@@ -59,6 +62,7 @@ const fetchPlayerStats = async function (player, season) {
 
 const formatSkaterStats = function (stats) {
   for (const [index, { stat }] of stats.entries()) {
+    const advancedStats = calcSkaterAdvancedStats(stat);
     stats[index].stat = new Map([
       ['GP', stat.games],
       ['G', stat.goals],
@@ -80,7 +84,8 @@ const formatSkaterStats = function (stats) {
       ['PPTOI', stat.powerPlayTimeOnIce],
       ['SHTOI', stat.shortHandedTimeOnIce],
       ['FO%', Number(stat.faceOffPct).toFixed(1)],
-      ['FPPG', Number(calcSkaterFPPG(stat)).toFixed(2)],
+      ['Fpts', Number(advancedStats.Fpts).toFixed(2)],
+      ['FPPG', Number(advancedStats.FPPG).toFixed(2)],
     ]);
   }
 
@@ -89,6 +94,7 @@ const formatSkaterStats = function (stats) {
 
 const formatGoalieStats = function (stats) {
   for (const [index, { stat }] of stats.entries()) {
+    const advancedStats = calcGoalieAdvancedStats(stat);
     stats[index].stat = new Map([
       ['GP', stat.games],
       ['GS', stat.gamesStarted],
@@ -102,7 +108,8 @@ const formatGoalieStats = function (stats) {
       ['SA', stat.shotsAgainst],
       ['SV', stat.saves],
       ['TOI', stat.timeOnIce],
-      ['FPPG', Number(calcGoalieFPPG(stat)).toFixed(2)],
+      ['Fpts', Number(advancedStats.Fpts).toFixed(2)],
+      ['FPPG', Number(advancedStats.FPPG).toFixed(2)],
     ]);
   }
 
