@@ -13,8 +13,8 @@ const fantasyPointValues = {
   win: 5,
 };
 
-const calcPlayerFPPG = function (stats) {
-  const fppg =
+const calcSkaterFPPG = function (stats) {
+  return (
     ((stats.goals ?? 0) * fantasyPointValues.goal +
       (stats.assists ?? 0) * fantasyPointValues.assist +
       (stats.hits ?? 0) * fantasyPointValues.hit +
@@ -23,9 +23,8 @@ const calcPlayerFPPG = function (stats) {
       (stats.shortHandedGoals ?? 0) * fantasyPointValues.shg +
       (stats.shots ?? 0) * fantasyPointValues.shot +
       (stats.powerPlayPoints ?? 0) * fantasyPointValues.ppp) /
-    stats.games;
-
-  return fppg;
+    stats.games
+  );
 };
 
 const calcGoalieFPPG = function (stats) {
@@ -40,4 +39,4 @@ const calcGoalieFPPG = function (stats) {
   );
 };
 
-export { calcPlayerFPPG, calcGoalieFPPG };
+export { calcSkaterFPPG, calcGoalieFPPG };
