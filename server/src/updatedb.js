@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import { MongoClient } from 'mongodb';
 import Player from './player.js';
+import { calcPlayerFPPG } from './advancedstats.js';
 
 const tryCatchForAsync = async function (promise) {
   try {
@@ -79,6 +80,7 @@ const formatSkaterStats = function (stats) {
       ['PPTOI', stat.powerPlayTimeOnIce],
       ['SHTOI', stat.shortHandedTimeOnIce],
       ['FO%', Number(stat.faceOffPct).toFixed(1)],
+      ['FPPG', Number(calcPlayerFPPG(stat)).toFixed(2)],
     ]);
   }
 
