@@ -124,29 +124,45 @@ const calculateFPARG = function (players) {
   const totalFPPG = {};
   players.forEach((player) => {
     player._stats.forEach((season) => {
-      if (!totalFPPG[season.season]) totalFPPG[season.season] = {};
+      if (!totalFPPG[season.season])
+        totalFPPG[season.season] = { f: {}, d: {}, g: {} };
 
-      totalFPPG[season.season].playerCount
-        ? totalFPPG[season.season].playerCount++
-        : (totalFPPG[season.season].playerCount = 1);
-      totalFPPG[season.season].Fpts
-        ? (totalFPPG[season.season].Fpts += Number(season.stat.get('FPPG')))
-        : (totalFPPG[season.season].Fpts = 1);
+      let position = 'f';
+      if (player.position === 'G') position = 'g';
+      else if (player.position === 'D') position = 'd';
+
+      totalFPPG[season.season][position].playerCount
+        ? totalFPPG[season.season][position].playerCount++
+        : (totalFPPG[season.season][position].playerCount = 1);
+      totalFPPG[season.season][position].Fpts
+        ? (totalFPPG[season.season][position].Fpts += Number(
+            season.stat.get('FPPG')
+          ))
+        : (totalFPPG[season.season][position].Fpts = 1);
     });
   });
 
   const averageFPPG = {};
   for (const season in totalFPPG) {
-    if (!averageFPPG[season]) averageFPPG[season] = {};
-    averageFPPG[season] =
-      totalFPPG[season].Fpts / totalFPPG[season].playerCount;
+    if (!averageFPPG[season]) averageFPPG[season] = { f: {}, d: {}, g: {} };
+    averageFPPG[season].f =
+      totalFPPG[season].f.Fpts / totalFPPG[season].f.playerCount;
+    averageFPPG[season].d =
+      totalFPPG[season].d.Fpts / totalFPPG[season].d.playerCount;
+    averageFPPG[season].g =
+      totalFPPG[season].g.Fpts / totalFPPG[season].g.playerCount;
   }
 
   return players.map((player) => {
     player._stats.map((season) => {
+      let position = 'f';
+      if (player.position === 'G') position = 'g';
+      else if (player.position === 'D') position = 'd';
       season.stat.set(
         'FPARG',
-        (season.stat.get('FPPG') - averageFPPG[season.season]).toFixed(2)
+        (
+          season.stat.get('FPPG') - averageFPPG[season.season][position]
+        ).toFixed(2)
       );
       return season;
     });
