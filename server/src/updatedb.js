@@ -40,7 +40,7 @@ const fetchPlayers = async function () {
   return players;
 };
 
-const fetchPlayerStats = async function (player, season) {
+const fetchPlayerStats = async function (player) {
   const [response, error] = await tryCatchForAsync(
     fetch(`https://statsapi.web.nhl.com/${player.link}/stats?stats=yearByYear`)
   );
@@ -174,9 +174,7 @@ const updateDb = async function () {
   const players = calculateFPARG(
     (
       await Promise.all(
-        (
-          await fetchPlayers()
-        ).map((player) => fetchPlayerStats(player, '20202021'))
+        (await fetchPlayers()).map((player) => fetchPlayerStats(player))
       )
     ).filter((player) => player !== null)
   );
