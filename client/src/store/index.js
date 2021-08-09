@@ -30,7 +30,7 @@ export default createStore({
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            season: '20202021'
+            season: 'latest'
           })
         })
       ).json();

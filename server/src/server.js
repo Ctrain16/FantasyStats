@@ -8,6 +8,8 @@ dotenv.config();
 
 import { updateDb } from './updatedb.js';
 
+const LATEST_SEASON = '20202021';
+
 const app = express();
 app.use(express.json());
 if (process.env.NODE_ENV === 'production')
@@ -24,7 +26,9 @@ app.get('/', (req, res) => {
 });
 
 app.post('/api/players', async (req, res) => {
-  const { season } = req.body;
+  let { season } = req.body;
+  if (season === 'latest') season = LATEST_SEASON;
+
   const cursor = playersCollection.find({});
   const players = await cursor.toArray();
 
@@ -38,7 +42,9 @@ app.post('/api/players', async (req, res) => {
 });
 
 app.post('/api/skaters', async (req, res) => {
-  const { season } = req.body;
+  let { season } = req.body;
+  if (season === 'latest') season = LATEST_SEASON;
+
   const cursor = playersCollection.find({ position: { $ne: 'G' } });
   const players = await cursor.toArray();
 
@@ -50,7 +56,9 @@ app.post('/api/skaters', async (req, res) => {
 });
 
 app.post('/api/goalies', async (req, res) => {
-  const { season } = req.body;
+  let { season } = req.body;
+  if (season === 'latest') season = LATEST_SEASON;
+
   const cursor = playersCollection.find({ position: { $eq: 'G' } });
   const players = await cursor.toArray();
 
