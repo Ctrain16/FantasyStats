@@ -116,14 +116,54 @@ const formatGoalieStats = function (stats) {
   return stats;
 };
 
+/**
+ * Calculates each players FPARG (Fantasy points above replacement / per game)
+ * @param {*} players
+ */
+const calculateFPARG = function (players) {
+  const totalFPPG = {};
+  players.forEach((player) => {
+    player._stats.forEach((season) => {
+      if (!totalFPPG[season.season]) totalFPPG[season.season] = {};
+
+      totalFPPG[season.season].playerCount
+        ? totalFPPG[season.season].playerCount++
+        : (totalFPPG[season.season].playerCount = 1);
+      totalFPPG[season.season].Fpts
+        ? (totalFPPG[season.season].Fpts += Number(season.stat.get('FPPG')))
+        : (totalFPPG[season.season].Fpts = 1);
+    });
+  });
+
+  const averageFPPG = {};
+  for (const season in totalFPPG) {
+    if (!averageFPPG[season]) averageFPPG[season] = {};
+    averageFPPG[season] =
+      totalFPPG[season].Fpts / totalFPPG[season].playerCount;
+  }
+
+  return players.map((player) => {
+    player._stats.map((season) => {
+      season.stat.set(
+        'FPARG',
+        (season.stat.get('FPPG') - averageFPPG[season.season]).toFixed(2)
+      );
+      return season;
+    });
+    return player;
+  });
+};
+
 const updateDb = async function () {
-  const players = (
-    await Promise.all(
-      (
-        await fetchPlayers()
-      ).map((player) => fetchPlayerStats(player, '20202021'))
-    )
-  ).filter((player) => player !== null);
+  const players = calculateFPARG(
+    (
+      await Promise.all(
+        (
+          await fetchPlayers()
+        ).map((player) => fetchPlayerStats(player, '20202021'))
+      )
+    ).filter((player) => player !== null)
+  );
 
   const mongoClient = new MongoClient(process.env.MONGO_CONNECTION, {
     useUnifiedTopology: true,
