@@ -2,6 +2,7 @@ import { createStore } from 'vuex';
 
 export default createStore({
   state: {
+    positions: ['Skaters', 'C', 'L', 'R', 'D', 'G'],
     players: [],
     teams: []
   },
