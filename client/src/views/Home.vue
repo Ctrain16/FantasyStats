@@ -4,14 +4,17 @@
       <Filter
         :label="'Position'"
         :options="positions"
-        v-model="filters.position"
+        v-model="position"
       ></Filter>
-      <Filter :label="'Team'" :options="teams" v-model="filters.team"></Filter>
+      <Filter
+        :label="'Team'"
+        :options="['All', ...teams]"
+        v-model="team"
+      ></Filter>
     </div>
 
-    <p v-show="skaters.length === 0">Fetching skaters...</p>
-    <p v-if="skaters[0] === 'error'">Error fetching skaters</p>
-    <div v-else-if="skaters.length > 0" id="player-chart">
+    <p v-if="sortedPlayers.length === 0">Error fetching skaters</p>
+    <div v-else id="player-chart">
       <table id="player-stats-table">
         <thead>
           <tr>
@@ -31,7 +34,7 @@
         </thead>
         <tbody>
           <tr
-            v-for="(player, i) in playersOnPage"
+            v-for="(player, i) in playersOnPage()"
             :key="i"
             @click="this.$router.push(`/player/${player._id}`)"
           >
@@ -41,11 +44,10 @@
             <td>{{ player.position }}</td>
             <td>{{ player.team.abbreviation }}</td>
             <td
-              v-for="(stat, name, index) in playerStats(i)"
+              v-for="(stat, name) in playerStats(i)"
               :key="name"
               :class="{
-                'active-column':
-                  index === 3 && (pageJustLoaded || sortColumn === 'P')
+                'active-column': name === sortColumn
               }"
             >
               {{ stat }}
@@ -69,6 +71,7 @@
 </template>
 
 <script>
+import { mapState, mapGetters } from 'vuex';
 import Filter from '../components/filter.vue';
 
 export default {
@@ -76,25 +79,33 @@ export default {
   components: { Filter },
   data() {
     return {
-      goalies: [],
-      skaters: [],
-      teams: [],
-      positions: ['Skaters', 'C', 'L', 'R', 'D', 'G'],
+      sortedPlayers: [],
 
       currentPage: 1,
       playersPerPage: 50,
 
-      sortColumn: 'P', // default to sort by points
+      sortColumn: 'P',
       sortDescending: true,
       lastSortColumnIndex: 0,
-      pageJustLoaded: true,
 
-      filters: {
-        season: '20202021',
-        team: 'All',
-        position: 'Skaters'
-      }
+      // filters
+      position: 'Skaters',
+      team: 'All',
+      season: '20202021'
     };
+  },
+  watch: {
+    position: function(newPosition) {
+      if (newPosition === 'G') {
+        this.sortedPlayers = this.goalies;
+        this.sortColumn = 'SV%';
+        this.sortPlayers('G');
+      } else {
+        this.sortedPlayers = this.skaters;
+        this.sortColumn = 'P';
+        this.sortPlayers('Skaters');
+      }
+    }
   },
   methods: {
     playerStats(index) {
@@ -103,33 +114,11 @@ export default {
       ]._stats.slice(-1)[0].stat;
     },
 
-    filterPlayers() {
-      if (this.filters.position === 'G') {
-        return this.goalies.filter(goalie => {
-          if (this.filters.team !== 'All')
-            return goalie.team.name === this.filters.team;
-          return goalie;
-        });
-      }
-
-      return this.skaters.filter(player => {
-        if (
-          this.filters.team !== 'All' &&
-          this.filters.position !== 'Skaters'
-        ) {
-          return (
-            player.team.name === this.filters.team &&
-            player.position === this.filters.position
-          );
-        } else if (this.filters.team !== 'All') {
-          return (
-            player.team.name === this.filters.team && player.position !== 'G'
-          );
-        } else if (this.filters.position !== 'Skaters') {
-          return player.position === this.filters.position;
-        }
-        return player.position !== 'G';
-      });
+    playersOnPage() {
+      return this.filterPlayers().slice(
+        (this.currentPage - 1) * this.playersPerPage,
+        this.currentPage * this.playersPerPage
+      );
     },
 
     getSeason(player) {
@@ -137,9 +126,29 @@ export default {
       return `${season.slice(0, 4)}-${season.slice(6)}`;
     },
 
-    selectSortColumn(e) {
-      this.pageJustLoaded = false;
+    filterPlayers() {
+      if (this.position === 'G') {
+        if (this.team !== 'All')
+          return this.sortedPlayers.filter(
+            goalie => goalie.team.name === this.team
+          );
+        return this.sortedPlayers;
+      }
 
+      return this.sortedPlayers.filter(skater => {
+        if (this.team !== 'All' && this.position !== 'Skaters') {
+          return (
+            skater.team.name === this.team && skater.position === this.position
+          );
+        } else if (this.team !== 'All') return skater.team.name === this.team;
+        else if (this.position !== 'Skaters')
+          return skater.position === this.position;
+
+        return skater;
+      });
+    },
+
+    selectSortColumn(e) {
       const tableHeaders = document.getElementById('player-stats-table')
         .children[0].children[0].children;
       const sortColumnIndex = [...tableHeaders].findIndex(
@@ -158,41 +167,32 @@ export default {
         this.sortColumn === e.target.textContent ? !this.sortDescending : true;
       this.sortColumn = e.target.textContent;
       this.currentPage = 1;
-      if (this.filters.position === 'G') {
-        this.goalies = this.goalies.sort((p1, p2) => {
-          const p1stats = String(
-            p1._stats.slice(-1)[0].stat[this.sortColumn]
-          ).replace(':', '');
-          const p2stats = String(
-            p2._stats.slice(-1)[0].stat[this.sortColumn]
-          ).replace(':', '');
+      this.sortPlayers(this.position);
+      this.$forceUpdate();
+    },
 
-          return this.sortDescending ? p2stats - p1stats : p1stats - p2stats;
-        });
-      } else {
-        this.skaters = this.skaters.sort((p1, p2) => {
-          const p1stats = String(
-            p1._stats.slice(-1)[0].stat[this.sortColumn]
-          ).replace(':', '');
-          const p2stats = String(
-            p2._stats.slice(-1)[0].stat[this.sortColumn]
-          ).replace(':', '');
+    sortPlayers(position) {
+      this.sortedPlayers = (position === 'G'
+        ? this.goalies
+        : this.skaters
+      ).sort((p1, p2) => {
+        const p1stats = String(
+          p1._stats.slice(-1)[0].stat[this.sortColumn]
+        ).replace(':', '');
+        const p2stats = String(
+          p2._stats.slice(-1)[0].stat[this.sortColumn]
+        ).replace(':', '');
 
-          return this.sortDescending ? p2stats - p1stats : p1stats - p2stats;
-        });
-      }
+        return this.sortDescending ? p2stats - p1stats : p1stats - p2stats;
+      });
     }
   },
   computed: {
-    playersOnPage() {
-      return this.filterPlayers().slice(
-        (this.currentPage - 1) * this.playersPerPage,
-        this.currentPage * this.playersPerPage
-      );
-    },
+    ...mapGetters(['goalies', 'skaters']),
+    ...mapState(['players', 'teams', 'positions']),
 
     playerStatCategories() {
-      if (this.filters.position !== 'G')
+      if (this.position !== 'G')
         return Object.keys(this.skaters[0]._stats.slice(-1)[0].stat);
       else return Object.keys(this.goalies[0]._stats.slice(-1)[0].stat);
     },
@@ -206,24 +206,7 @@ export default {
     }
   },
   async mounted() {
-    try {
-      this.teams = ['All', ...this.$store.state.teams];
-      this.goalies = this.$store.getters.goalies;
-      this.skaters = this.$store.getters.skaters.sort((p1, p2) => {
-        const p1stats = String(p1._stats.slice(-1)[0].stat['P']).replace(
-          ':',
-          ''
-        );
-        const p2stats = String(p2._stats.slice(-1)[0].stat['P']).replace(
-          ':',
-          ''
-        );
-        return this.sortDescending ? p2stats - p1stats : p1stats - p2stats;
-      });
-    } catch (error) {
-      this.skaters.push('error');
-      console.error(error);
-    }
+    this.sortPlayers('Skaters');
   }
 };
 </script>
