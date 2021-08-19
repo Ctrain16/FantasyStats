@@ -35,7 +35,7 @@ app.post('/api/players', async (req, res) => {
   res.send(
     season
       ? players.filter((player) => {
-          return player._stats.slice(-1)[0].season === season;
+          return player._stats.find((year) => year.season === season);
         })
       : players
   );
@@ -82,6 +82,27 @@ app.get('/api/teams', async (req, res) => {
       .map((team) => team.name)
       .sort()
   );
+});
+
+app.get('/api/seasons', async (req, res) => {
+  res.send([
+    '2020-21',
+    '2019-20',
+    '2018-19',
+    '2017-18',
+    '2016-17',
+    '2015-16',
+    '2014-15',
+    '2013-14',
+    '2012-13',
+    '2011-12',
+    '2010-11',
+    '2009-10',
+    '2008-09',
+    '2007-08',
+    '2006-07',
+    '2005-06',
+  ]);
 });
 
 app.get('/api/updatedb', async (req, res) => {

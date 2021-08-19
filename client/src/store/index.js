@@ -4,7 +4,8 @@ export default createStore({
   state: {
     positions: ['Skaters', 'C', 'L', 'R', 'D', 'G'],
     players: [],
-    teams: []
+    teams: [],
+    seasons: []
   },
   getters: {
     goalies: state => {
@@ -20,6 +21,9 @@ export default createStore({
     },
     setTeams(state, teams) {
       state.teams = teams;
+    },
+    setSeasons(state, seasons) {
+      state.seasons = seasons;
     }
   },
   actions: {
@@ -36,6 +40,8 @@ export default createStore({
         })
       ).json();
       const teams = await (await fetch('api/teams')).json();
+      const seasons = await (await fetch('api/seasons')).json();
+      commit('setSeasons', seasons);
       commit('setTeams', teams);
       commit('setPlayers', players);
     }

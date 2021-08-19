@@ -11,6 +11,7 @@
         :options="['All', ...teams]"
         v-model="team"
       ></Filter>
+      <Filter :label="'Season'" :options="seasons" v-model="season"></Filter>
     </div>
 
     <p v-if="sortedPlayers.length === 0">Error fetching skaters</p>
@@ -91,7 +92,7 @@ export default {
       // filters
       position: 'Skaters',
       team: 'All',
-      season: '20202021'
+      season: '2020-21'
     };
   },
   watch: {
@@ -111,7 +112,10 @@ export default {
     playerStats(index) {
       return this.filterPlayers()[
         index + (this.currentPage - 1) * this.playersPerPage
-      ]._stats.slice(-1)[0].stat;
+      ]._stats.find(
+        year =>
+          year.season === `${this.season.slice(0, 4)}20${this.season.slice(-2)}`
+      ).stat;
     },
 
     playersOnPage() {
@@ -132,20 +136,35 @@ export default {
           return this.sortedPlayers.filter(
             goalie => goalie.team.name === this.team
           );
-        return this.sortedPlayers;
+        return this.sortedPlayers.filter(player => {
+          return player._stats.find(
+            year =>
+              year.season ===
+              `${this.season.slice(0, 4)}20${this.season.slice(-2)}`
+          );
+        });
       }
 
-      return this.sortedPlayers.filter(skater => {
-        if (this.team !== 'All' && this.position !== 'Skaters') {
-          return (
-            skater.team.name === this.team && skater.position === this.position
-          );
-        } else if (this.team !== 'All') return skater.team.name === this.team;
-        else if (this.position !== 'Skaters')
-          return skater.position === this.position;
+      return this.sortedPlayers
+        .filter(skater => {
+          if (this.team !== 'All' && this.position !== 'Skaters') {
+            return (
+              skater.team.name === this.team &&
+              skater.position === this.position
+            );
+          } else if (this.team !== 'All') return skater.team.name === this.team;
+          else if (this.position !== 'Skaters')
+            return skater.position === this.position;
 
-        return skater;
-      });
+          return skater;
+        })
+        .filter(player => {
+          return player._stats.find(
+            year =>
+              year.season ===
+              `${this.season.slice(0, 4)}20${this.season.slice(-2)}`
+          );
+        });
     },
 
     selectSortColumn(e) {
@@ -189,7 +208,7 @@ export default {
   },
   computed: {
     ...mapGetters(['goalies', 'skaters']),
-    ...mapState(['players', 'teams', 'positions']),
+    ...mapState(['players', 'teams', 'positions', 'seasons']),
 
     playerStatCategories() {
       if (this.position !== 'G')
