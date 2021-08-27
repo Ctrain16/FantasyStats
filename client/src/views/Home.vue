@@ -11,11 +11,15 @@
         :options="['All', ...teams]"
         v-model="team"
       ></Filter>
-      <Filter :label="'Season'" :options="seasons" v-model="season"></Filter>
+      <Filter
+        :label="'Season'"
+        :options="seasons"
+        v-model="tempSeason"
+      ></Filter>
     </div>
 
     <p v-if="sortedPlayers.length === 0">Error fetching skaters</p>
-    <div v-else id="player-chart">
+    <div id="player-chart">
       <table id="player-stats-table">
         <thead>
           <tr>
@@ -35,7 +39,7 @@
         </thead>
         <tbody>
           <tr
-            v-for="(player, i) in playersOnPage()"
+            v-for="(player, i) in playersOnPage"
             :key="i"
             @click="this.$router.push(`/player/${player._id}`)"
           >
@@ -93,7 +97,8 @@ export default {
       // filters
       position: 'Skaters',
       team: 'All',
-      season: '2020-21'
+      season: '2020-21',
+      tempSeason: '2020-21'
     };
   },
   watch: {
@@ -115,7 +120,7 @@ export default {
       this.filterPlayers();
     },
 
-    season: async function(newSeason) {
+    tempSeason: async function(newSeason) {
       await this.$store.dispatch('updatePlayers', {
         season: `${newSeason.slice(0, 4)}20${newSeason.slice(-2)}`
       });
@@ -130,6 +135,7 @@ export default {
 
       this.currentPage = 1;
       this.sortDescending = true;
+      this.season = newSeason;
 
       this.sortPlayers();
       this.filterPlayers();
@@ -148,13 +154,6 @@ export default {
       return player._stats.find(
         year =>
           year.season === `${this.season.slice(0, 4)}20${this.season.slice(-2)}`
-      );
-    },
-
-    playersOnPage() {
-      return this.filteredPlayers.slice(
-        (this.currentPage - 1) * this.playersPerPage,
-        this.currentPage * this.playersPerPage
       );
     },
 
@@ -240,12 +239,18 @@ export default {
           Math.ceil(this.filteredPlayers.length / this.playersPerPage)
         ).keys()
       );
+    },
+
+    playersOnPage() {
+      return this.filteredPlayers.slice(
+        (this.currentPage - 1) * this.playersPerPage,
+        this.currentPage * this.playersPerPage
+      );
     }
   },
   async mounted() {
     this.sortedPlayers = this.skaters;
     this.sortPlayers();
-    this.filterPlayers();
   }
 };
 </script>
