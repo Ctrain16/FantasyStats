@@ -44,6 +44,26 @@ export default createStore({
       commit('setSeasons', seasons);
       commit('setTeams', teams);
       commit('setPlayers', players);
+    },
+
+    async updatePlayers({ commit }, { season }) {
+      try {
+        const players = await (
+          await fetch('api/players', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              season: season
+            })
+          })
+        ).json();
+
+        commit('setPlayers', players);
+      } catch (error) {
+        console.error('Failed to update players.');
+      }
     }
   },
   modules: {}

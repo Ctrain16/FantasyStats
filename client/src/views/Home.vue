@@ -41,7 +41,7 @@
           >
             <td>{{ i + 1 + (currentPage - 1) * playersPerPage }}</td>
             <td>{{ player.fullName }}</td>
-            <td>{{ getSeason(player) }}</td>
+            <td>{{ season }}</td>
             <td>{{ player.position }}</td>
             <td>{{ player.team.abbreviation }}</td>
             <td
@@ -81,6 +81,7 @@ export default {
   data() {
     return {
       sortedPlayers: [],
+      filteredPlayers: [],
 
       currentPage: 1,
       playersPerPage: 50,
@@ -96,56 +97,79 @@ export default {
     };
   },
   watch: {
-    position: function(newPosition) {
+    position: function(newPosition, oldPosition) {
+      this.filterPlayers();
+      if (newPosition !== 'G' && oldPosition !== 'G') return;
+
       if (newPosition === 'G') {
         this.sortedPlayers = this.goalies;
         this.sortColumn = 'SV%';
-        this.sortPlayers('G');
       } else {
         this.sortedPlayers = this.skaters;
         this.sortColumn = 'P';
-        this.sortPlayers('Skaters');
       }
+      this.sortPlayers();
+    },
+
+    team: function() {
+      this.filterPlayers();
+    },
+
+    season: async function(newSeason) {
+      await this.$store.dispatch('updatePlayers', {
+        season: `${newSeason.slice(0, 4)}20${newSeason.slice(-2)}`
+      });
+
+      if (this.position === 'G') {
+        this.sortedPlayers = this.goalies;
+        this.sortColumn = 'SV%';
+      } else {
+        this.sortedPlayers = this.skaters;
+        this.sortColumn = 'P';
+      }
+
+      this.currentPage = 1;
+      this.sortDescending = true;
+
+      this.sortPlayers();
+      this.filterPlayers();
     }
   },
   methods: {
     playerStats(index) {
-      return this.filterPlayers()[
-        index + (this.currentPage - 1) * this.playersPerPage
-      ]._stats.find(
-        year =>
-          year.season === `${this.season.slice(0, 4)}20${this.season.slice(-2)}`
+      return this.playerStatsSeason(
+        this.filteredPlayers[
+          index + (this.currentPage - 1) * this.playersPerPage
+        ]
       ).stat;
     },
 
+    playerStatsSeason(player) {
+      return player._stats.find(
+        year =>
+          year.season === `${this.season.slice(0, 4)}20${this.season.slice(-2)}`
+      );
+    },
+
     playersOnPage() {
-      return this.filterPlayers().slice(
+      return this.filteredPlayers.slice(
         (this.currentPage - 1) * this.playersPerPage,
         this.currentPage * this.playersPerPage
       );
     },
 
-    getSeason(player) {
-      const season = player._stats.slice(-1)[0].season;
-      return `${season.slice(0, 4)}-${season.slice(6)}`;
-    },
-
     filterPlayers() {
       if (this.position === 'G') {
         if (this.team !== 'All')
-          return this.sortedPlayers.filter(
+          this.filteredPlayers = this.sortedPlayers.filter(
             goalie => goalie.team.name === this.team
           );
-        return this.sortedPlayers.filter(player => {
-          return player._stats.find(
-            year =>
-              year.season ===
-              `${this.season.slice(0, 4)}20${this.season.slice(-2)}`
-          );
+        this.filteredPlayers = this.sortedPlayers.filter(player => {
+          return this.playerStatsSeason(player);
         });
       }
 
-      return this.sortedPlayers
+      this.filteredPlayers = this.sortedPlayers
         .filter(skater => {
           if (this.team !== 'All' && this.position !== 'Skaters') {
             return (
@@ -159,11 +183,7 @@ export default {
           return skater;
         })
         .filter(player => {
-          return player._stats.find(
-            year =>
-              year.season ===
-              `${this.season.slice(0, 4)}20${this.season.slice(-2)}`
-          );
+          return this.playerStatsSeason(player);
         });
     },
 
@@ -186,24 +206,22 @@ export default {
         this.sortColumn === e.target.textContent ? !this.sortDescending : true;
       this.sortColumn = e.target.textContent;
       this.currentPage = 1;
-      this.sortPlayers(this.position);
+      this.sortPlayers();
       this.$forceUpdate();
     },
 
-    sortPlayers(position) {
-      this.sortedPlayers = (position === 'G'
-        ? this.goalies
-        : this.skaters
-      ).sort((p1, p2) => {
+    sortPlayers() {
+      this.sortedPlayers = this.sortedPlayers.sort((p1, p2) => {
         const p1stats = String(
-          p1._stats.slice(-1)[0].stat[this.sortColumn]
+          this.playerStatsSeason(p1).stat[this.sortColumn]
         ).replace(':', '');
         const p2stats = String(
-          p2._stats.slice(-1)[0].stat[this.sortColumn]
+          this.playerStatsSeason(p2).stat[this.sortColumn]
         ).replace(':', '');
 
         return this.sortDescending ? p2stats - p1stats : p1stats - p2stats;
       });
+      this.filterPlayers();
     }
   },
   computed: {
@@ -219,13 +237,15 @@ export default {
     numberOfPages() {
       return Array.from(
         Array(
-          Math.ceil(this.filterPlayers().length / this.playersPerPage)
+          Math.ceil(this.filteredPlayers.length / this.playersPerPage)
         ).keys()
       );
     }
   },
   async mounted() {
-    this.sortPlayers('Skaters');
+    this.sortedPlayers = this.skaters;
+    this.sortPlayers();
+    this.filterPlayers();
   }
 };
 </script>
