@@ -7,6 +7,7 @@ import { MongoClient } from 'mongodb';
 dotenv.config();
 
 import { updateDb } from './updatedb.js';
+import { fetchPlayerIds } from './fetchplayerids.js';
 
 const LATEST_SEASON = '20202021';
 
@@ -103,6 +104,11 @@ app.get('/api/seasons', async (req, res) => {
     '2006-07',
     '2005-06',
   ]);
+});
+
+app.get('/api/updateIds', async (req, res) => {
+  await fetchPlayerIds();
+  res.send('Succesfully updated player ids.');
 });
 
 app.get('/api/updatedb', async (req, res) => {
