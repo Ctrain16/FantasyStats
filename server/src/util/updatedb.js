@@ -5,6 +5,7 @@ import {
   calcSkaterAdvancedStats,
   calcGoalieAdvancedStats,
 } from './advancedstats.js';
+import { fetchTeamAbbreviations } from './fetchteamabbreviation.js';
 
 const tryCatchForAsync = async function (promise) {
   try {
@@ -16,27 +17,22 @@ const tryCatchForAsync = async function (promise) {
   }
 };
 
-const fetchPlayers = async function () {
-  const [response, error] = await tryCatchForAsync(
-    fetch('https://statsapi.web.nhl.com/api/v1/teams?expand=team.roster')
+const fetchPlayers = async function (ids) {
+  const players = await Promise.all(
+    ids.map(async (id) => {
+      const [response, error] = await tryCatchForAsync(
+        fetch(`https://statsapi.web.nhl.com/api/v1/people/${id}`)
+      );
+      if (error) return;
+
+      const [data, error2] = await tryCatchForAsync(response.json());
+      if (error2) return;
+
+      return new Player(data.people);
+    })
   );
-  if (error) return;
 
-  const [data, error2] = await tryCatchForAsync(response.json());
-  if (error2) return;
-
-  const teams = data.teams;
-
-  const players = [];
-  teams.forEach(function (team) {
-    const rosterJSON = team['roster'];
-    if (rosterJSON) {
-      rosterJSON['roster'].forEach(function (player) {
-        players.push(new Player(player, team));
-      });
-    }
-  });
-
+  console.log(`[INFO]: Players fetched.`);
   return players;
 };
 
@@ -50,14 +46,14 @@ const fetchPlayerStats = async function (player) {
   if (error2) return;
 
   if (data.stats) {
-    if (player.position === 'G')
+    if (player.primaryPosition.code === 'G')
       player.stats = formatGoalieStats(data.stats[0].splits);
     else player.stats = formatSkaterStats(data.stats[0].splits);
   } else
     console.log(
       `[ERROR]: could not get stats for '${player.fullName}'... [RESPONSE MESSAGE]: ${data.message}`
     );
-  return player.stats && player.stats.length > 0 ? player : null; // remove players where we couldn't get their stats or they haven't played in the NHL, why the NHL API would still include them seems dumb
+  return player.statistics && player.statistics.length > 0 ? player : null; // remove players where we couldn't get their stats or they haven't played in the NHL, why the NHL API would still include them seems dumb
 };
 
 const formatSkaterStats = function (stats) {
@@ -123,13 +119,13 @@ const formatGoalieStats = function (stats) {
 const calculateFPARG = function (players) {
   const totalFPPG = {};
   players.forEach((player) => {
-    player._stats.forEach((season) => {
+    player.statistics.forEach((season) => {
       if (!totalFPPG[season.season])
         totalFPPG[season.season] = { f: {}, d: {}, g: {} };
 
       let position = 'f';
-      if (player.position === 'G') position = 'g';
-      else if (player.position === 'D') position = 'd';
+      if (player.primaryPosition.code === 'G') position = 'g';
+      else if (player.primaryPosition.code === 'D') position = 'd';
 
       totalFPPG[season.season][position].playerCount
         ? totalFPPG[season.season][position].playerCount++
@@ -154,10 +150,10 @@ const calculateFPARG = function (players) {
   }
 
   return players.map((player) => {
-    player._stats.map((season) => {
+    player.statistics.map((season) => {
       let position = 'f';
-      if (player.position === 'G') position = 'g';
-      else if (player.position === 'D') position = 'd';
+      if (player.primaryPosition.code === 'G') position = 'g';
+      else if (player.primaryPosition.code === 'D') position = 'd';
       season.stat.set(
         'FPARG',
         (
@@ -171,23 +167,33 @@ const calculateFPARG = function (players) {
 };
 
 const updateDb = async function () {
-  const players = calculateFPARG(
-    (
-      await Promise.all(
-        (await fetchPlayers()).map((player) => fetchPlayerStats(player))
-      )
-    ).filter((player) => player !== null)
-  );
+  console.log(`[INFO]: Beginning to update playerdb.`);
+  await fetchTeamAbbreviations();
 
   const mongoClient = new MongoClient(process.env.MONGO_CONNECTION, {
     useUnifiedTopology: true,
   });
   await mongoClient.connect();
 
+  const playerIdCollection = mongoClient
+    .db('playerdb')
+    .collection('player-ids');
+  const { playerids } = await playerIdCollection.findOne({ _id: 1 });
+
+  const players = calculateFPARG(
+    (
+      await Promise.all(
+        (
+          await fetchPlayers(playerids)
+        ).map((player) => fetchPlayerStats(player))
+      )
+    ).filter((player) => player !== null)
+  );
+  console.log(`[INFO]: Players stats fetched.`);
+
   const playersCollection = mongoClient
     .db('playerdb')
     .collection('player-stats');
-
   for (const player of players) {
     await playersCollection.updateOne(
       { _id: player.id }, // query

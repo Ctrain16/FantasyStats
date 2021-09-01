@@ -112,8 +112,13 @@ app.get('/api/updateIds', async (req, res) => {
 });
 
 app.get('/api/updatedb', async (req, res) => {
-  await updateDb();
-  res.send('Succesfully updated database.');
+  try {
+    await updateDb();
+    res.send('Succesfully updated database.');
+  } catch (error) {
+    console.error(`[ERROR]: ${error}`);
+    res.status(500).send(`Failed to update database.`);
+  }
 });
 
 const port = process.env.PORT || 3001;
