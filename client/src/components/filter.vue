@@ -6,7 +6,12 @@
       :id="label"
       @input="this.$emit('update:modelValue', $event.target.value)"
     >
-      <option v-for="option in options" :key="option">{{ option }}</option>
+      <option
+        v-for="option in options"
+        :key="option"
+        :selected="this.selected === option"
+        >{{ option }}</option
+      >
     </select>
   </div>
 </template>
@@ -16,7 +21,8 @@ export default {
   name: 'Filter',
   props: {
     label: String,
-    options: Array
+    options: Array,
+    selected: String
   }
 };
 </script>

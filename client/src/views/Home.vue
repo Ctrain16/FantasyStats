@@ -14,6 +14,7 @@
       <Filter
         :label="'Season'"
         :options="seasons"
+        :selected="tempSeason"
         v-model="tempSeason"
       ></Filter>
     </div>
@@ -97,7 +98,6 @@ export default {
       // filters
       position: 'Skaters',
       team: 'All',
-      season: '2020-21',
       tempSeason: '2020-21'
     };
   },
@@ -135,7 +135,7 @@ export default {
 
       this.currentPage = 1;
       this.sortDescending = true;
-      this.season = newSeason;
+      this.$store.commit('updateSeason', newSeason);
 
       this.sortPlayers();
       this.filterPlayers();
@@ -229,7 +229,7 @@ export default {
   },
   computed: {
     ...mapGetters(['goalies', 'skaters']),
-    ...mapState(['players', 'teams', 'positions', 'seasons']),
+    ...mapState(['players', 'teams', 'positions', 'seasons', 'season']),
 
     playerStatCategories() {
       if (this.position !== 'G')
@@ -254,6 +254,7 @@ export default {
   },
   async mounted() {
     this.sortedPlayers = this.skaters;
+    this.tempSeason = this.season;
     this.sortPlayers();
   }
 };

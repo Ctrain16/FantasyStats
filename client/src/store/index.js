@@ -5,7 +5,8 @@ export default createStore({
     positions: ['Skaters', 'C', 'L', 'R', 'D', 'G'],
     players: [],
     teams: [],
-    seasons: []
+    seasons: [],
+    season: '2020-21'
   },
   getters: {
     goalies: state => {
@@ -24,6 +25,10 @@ export default createStore({
     },
     setSeasons(state, seasons) {
       state.seasons = seasons;
+    },
+
+    updateSeason(state, season) {
+      state.season = season;
     }
   },
   actions: {
