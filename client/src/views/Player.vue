@@ -2,9 +2,11 @@
   <div class="player" v-if="player.fullName">
     <div class="player-info">
       <h3>{{ player.fullName }}</h3>
-      <p><b>Team:</b> {{ player.team.name }}</p>
+      <p>
+        <b>Team:</b>
+        {{ player.active ? player.currentTeam.name : 'Retired' }}
+      </p>
       <p><b>Position:</b> {{ player.position }}</p>
-      <p><b>Number:</b> {{ player.number }}</p>
     </div>
 
     <div id="player-chart">
@@ -17,7 +19,7 @@
           </th>
         </thead>
         <tbody>
-          <tr v-for="(season, i) in player._stats" :key="i">
+          <tr v-for="(season, i) in player.statistics" :key="i">
             <td>{{ formatSeason(season.season) }}</td>
             <td>{{ season.team.name }}</td>
             <td v-for="(stat, i) in season.stat" :key="i">
@@ -65,7 +67,7 @@ export default {
   },
   computed: {
     playerStatCategories() {
-      return Object.keys(this.player._stats.slice(-1)[0].stat);
+      return Object.keys(this.player.statistics.slice(-1)[0].stat);
     }
   },
   async mounted() {

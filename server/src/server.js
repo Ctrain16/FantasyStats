@@ -36,7 +36,7 @@ app.post('/api/players', async (req, res) => {
   res.send(
     season
       ? players.filter((player) => {
-          return player._stats.find((year) => year.season === season);
+          return player.statistics.find((year) => year.season === season);
         })
       : players
   );
@@ -51,7 +51,7 @@ app.post('/api/skaters', async (req, res) => {
 
   res.send(
     players.filter((player) => {
-      return player._stats.slice(-1)[0].season === season;
+      return player.statistics.slice(-1)[0].season === season;
     })
   );
 });
@@ -65,7 +65,7 @@ app.post('/api/goalies', async (req, res) => {
 
   res.send(
     players.filter((player) => {
-      return player._stats.slice(-1)[0].season === season;
+      return player.statistics.slice(-1)[0].season === season;
     })
   );
 });

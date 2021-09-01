@@ -47,7 +47,7 @@
             <td>{{ player.fullName }}</td>
             <td>{{ season }}</td>
             <td>{{ player.position }}</td>
-            <td>{{ player.team.abbreviation }}</td>
+            <td>{{ playerTeam(player) }}</td>
             <td
               v-for="(stat, name) in playerStats(i)"
               :key="name"
@@ -151,10 +151,14 @@ export default {
     },
 
     playerStatsSeason(player) {
-      return player._stats.find(
+      return player.statistics.find(
         year =>
           year.season === `${this.season.slice(0, 4)}20${this.season.slice(-2)}`
       );
+    },
+
+    playerTeam(player) {
+      return this.playerStatsSeason(player).team.abbreviation;
     },
 
     filterPlayers() {
@@ -229,8 +233,8 @@ export default {
 
     playerStatCategories() {
       if (this.position !== 'G')
-        return Object.keys(this.skaters[0]._stats.slice(-1)[0].stat);
-      else return Object.keys(this.goalies[0]._stats.slice(-1)[0].stat);
+        return Object.keys(this.skaters[0].statistics.slice(-1)[0].stat);
+      else return Object.keys(this.goalies[0].statistics.slice(-1)[0].stat);
     },
 
     numberOfPages() {
