@@ -5,6 +5,7 @@ class Player {
     for (const property in player[0]) {
       this[property] = player[0][property];
     }
+    this.position = player[0].primaryPosition.code;
   }
 
   set stats(stats) {
