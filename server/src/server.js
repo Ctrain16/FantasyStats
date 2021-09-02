@@ -26,7 +26,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(path.resolve(), '../client/dist/index.html'));
 });
 
-app.post('/api/players', async (req, res) => {
+app.post('/api/players', async (req, res, next) => {
   try {
     let { season } = req.body;
     if (season === 'latest') season = LATEST_SEASON;
@@ -38,11 +38,11 @@ app.post('/api/players', async (req, res) => {
 
     res.send(players);
   } catch (error) {
-    console.error(error);
+    next(error);
   }
 });
 
-app.post('/api/skaters', async (req, res) => {
+app.post('/api/skaters', async (req, res, next) => {
   try {
     let { season } = req.body;
     if (season === 'latest') season = LATEST_SEASON;
@@ -55,11 +55,11 @@ app.post('/api/skaters', async (req, res) => {
 
     res.send(skaters);
   } catch (error) {
-    console.error(error);
+    next(error);
   }
 });
 
-app.post('/api/goalies', async (req, res) => {
+app.post('/api/goalies', async (req, res, next) => {
   try {
     let { season } = req.body;
     if (season === 'latest') season = LATEST_SEASON;
@@ -72,7 +72,7 @@ app.post('/api/goalies', async (req, res) => {
 
     res.send(goalies);
   } catch (error) {
-    console.error(error);
+    next(error);
   }
 });
 
@@ -130,4 +130,10 @@ app.get('/api/updatedb', async (req, res) => {
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+});
+
+process.on('SIGINT', async function () {
+  await mongoClient.close();
+  console.log('Closed Mongo connection.');
+  process.exit(0);
 });
