@@ -2,6 +2,7 @@ import path from 'path';
 import express from 'express';
 import * as dotenv from 'dotenv';
 import fetch from 'node-fetch';
+import morgan from 'morgan';
 import { MongoClient } from 'mongodb';
 
 dotenv.config();
@@ -13,6 +14,8 @@ const LATEST_SEASON = '20202021';
 
 const app = express();
 app.use(express.json());
+app.use(morgan('common'));
+
 if (process.env.NODE_ENV === 'production')
   app.use(express.static(path.join(path.resolve(), '../client/dist')));
 
