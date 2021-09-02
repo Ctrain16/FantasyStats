@@ -25,8 +25,12 @@ const mongoClient = new MongoClient(process.env.MONGO_CONNECTION, {
 await mongoClient.connect();
 const playersCollection = mongoClient.db('playerdb').collection('player-stats');
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(path.resolve(), '../client/dist/index.html'));
+app.get('/', (req, res, next) => {
+  try {
+    res.sendFile(path.join(path.resolve(), '../client/dist/index.html'));
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.post('/api/players', async (req, res, next) => {
@@ -79,33 +83,44 @@ app.post('/api/goalies', async (req, res, next) => {
   }
 });
 
-app.post('/api/player', async (req, res) => {
-  const { id } = req.body;
-  res.send(await playersCollection.findOne({ _id: Number(id) }));
+app.post('/api/player', async (req, res, next) => {
+  try {
+    const { id } = req.body;
+    res.send(await playersCollection.findOne({ _id: Number(id) }));
+  } catch (error) {
+    next(error);
+  }
 });
 
-app.get('/api/teams', async (req, res) => {
-  res.send(
-    (
-      await (await fetch('https://statsapi.web.nhl.com/api/v1/teams')).json()
-    ).teams
-      .map((team) => team.name)
-      .sort()
-  );
+app.get('/api/teams', async (req, res, next) => {
+  try {
+    res.send(
+      (
+        await (await fetch('https://statsapi.web.nhl.com/api/v1/teams')).json()
+      ).teams
+        .map((team) => team.name)
+        .sort()
+    );
+  } catch (error) {
+    next(error);
+  }
 });
 
-app.get('/api/updateIds', async (req, res) => {
-  await fetchPlayerIds();
-  res.send('Succesfully updated player ids.');
+app.get('/api/updateIds', async (req, res, next) => {
+  try {
+    await fetchPlayerIds();
+    res.send('Succesfully updated player ids.');
+  } catch (error) {
+    next(error);
+  }
 });
 
-app.get('/api/updatedb', async (req, res) => {
+app.get('/api/updatedb', async (req, res, next) => {
   try {
     await updateDb();
     res.send('Succesfully updated database.');
   } catch (error) {
-    console.error(`[ERROR]: ${error}`);
-    res.status(500).send(`Failed to update database.`);
+    next(error);
   }
 });
 
