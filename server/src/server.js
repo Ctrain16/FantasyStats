@@ -27,47 +27,53 @@ app.get('/', (req, res) => {
 });
 
 app.post('/api/players', async (req, res) => {
-  let { season } = req.body;
-  if (season === 'latest') season = LATEST_SEASON;
+  try {
+    let { season } = req.body;
+    if (season === 'latest') season = LATEST_SEASON;
 
-  const cursor = playersCollection.find({});
-  const players = await cursor.toArray();
+    const cursor = playersCollection.find({
+      statistics: { $elemMatch: { season: season } },
+    });
+    const players = await cursor.toArray();
 
-  res.send(
-    season
-      ? players.filter((player) => {
-          return player.statistics.find((year) => year.season === season);
-        })
-      : players
-  );
+    res.send(players);
+  } catch (error) {
+    console.error(error);
+  }
 });
 
 app.post('/api/skaters', async (req, res) => {
-  let { season } = req.body;
-  if (season === 'latest') season = LATEST_SEASON;
+  try {
+    let { season } = req.body;
+    if (season === 'latest') season = LATEST_SEASON;
 
-  const cursor = playersCollection.find({ position: { $ne: 'G' } });
-  const players = await cursor.toArray();
+    const cursor = playersCollection.find({
+      position: { $ne: 'G' },
+      statistics: { $elemMatch: { season: season } },
+    });
+    const skaters = await cursor.toArray();
 
-  res.send(
-    players.filter((player) => {
-      return player.statistics.slice(-1)[0].season === season;
-    })
-  );
+    res.send(skaters);
+  } catch (error) {
+    console.error(error);
+  }
 });
 
 app.post('/api/goalies', async (req, res) => {
-  let { season } = req.body;
-  if (season === 'latest') season = LATEST_SEASON;
+  try {
+    let { season } = req.body;
+    if (season === 'latest') season = LATEST_SEASON;
 
-  const cursor = playersCollection.find({ position: { $eq: 'G' } });
-  const players = await cursor.toArray();
+    const cursor = playersCollection.find({
+      position: { $eq: 'G' },
+      statistics: { $elemMatch: { season: season } },
+    });
+    const goalies = await cursor.toArray();
 
-  res.send(
-    players.filter((player) => {
-      return player.statistics.slice(-1)[0].season === season;
-    })
-  );
+    res.send(goalies);
+  } catch (error) {
+    console.error(error);
+  }
 });
 
 app.post('/api/player', async (req, res) => {
