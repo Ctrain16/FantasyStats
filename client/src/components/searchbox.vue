@@ -23,17 +23,19 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
   name: 'SearchBox',
   data() {
     return {
-      players: this.$store.state.players,
       search: '',
       searchFocus: -1,
       searchResults: [],
       maxResults: 5
     };
   },
+  computed: mapState(['players']),
   methods: {
     searchForPlayer() {
       this.searchResults = [];
