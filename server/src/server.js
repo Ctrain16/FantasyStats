@@ -106,6 +106,28 @@ app.get('/api/teams', async (req, res, next) => {
   }
 });
 
+app.get('/api/search/:query', async (req, res, next) => {
+  try {
+    const query = req.params.query;
+    const cursor = playersCollection
+      .find(
+        {
+          $text: { $search: query + '*' },
+        },
+        { score: { $meta: 'textScore' } }
+      )
+      .sort({ score: { $meta: 'textScore' } })
+      .limit(5);
+
+    const results = await cursor.toArray();
+    res.send(results);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Database Routes
+// TODO need to protect these routes
 app.get('/api/updateIds', async (req, res, next) => {
   try {
     await fetchPlayerIds();

@@ -23,8 +23,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
-
 export default {
   name: 'SearchBox',
   data() {
@@ -35,21 +33,25 @@ export default {
       maxResults: 5
     };
   },
-  computed: mapState(['players']),
   methods: {
-    searchForPlayer() {
-      this.searchResults = [];
-      if (this.search !== '') {
-        this.searchResults = this.players
-          .filter(player =>
-            player.fullName.toLowerCase().startsWith(this.search.toLowerCase())
-          )
-          .slice(0, this.maxResults);
-      }
+    async searchForPlayer() {
+      if (this.search === '' || this.search.replaceAll(' ', '').length === 0)
+        return;
 
-      if (this.searchResults.length === 0) this.searchFocus = -1;
-      else if (this.searchFocus > this.searchResults.length)
-        this.searchFocus = this.searchResults.length - 1;
+      try {
+        const res = await fetch(
+          `/api/search/${encodeURIComponent(this.search)}`
+        );
+        const data = await res.json();
+
+        this.searchResults = data ?? [];
+
+        if (this.searchResults.length === 0) this.searchFocus = -1;
+        else if (this.searchFocus > this.searchResults.length)
+          this.searchFocus = this.searchResults.length - 1;
+      } catch (error) {
+        console.error(error);
+      }
     },
 
     clickPlayer(playerID) {
@@ -61,10 +63,15 @@ export default {
 
     submit(e) {
       e.preventDefault();
-      if (this.searchResults.length > 0 && this.searchFocus !== -1)
+      if (this.searchResults.length > 0 && this.searchFocus !== -1) {
         this.clickPlayer(this.searchResults[this.searchFocus]._id);
-      else if (this.searchResults.length > 0)
+        document.querySelector('.searchbox').blur();
+        this.search = '';
+      } else if (this.searchResults.length > 0) {
         this.clickPlayer(this.searchResults[0]._id);
+        document.querySelector('.searchbox').blur();
+        this.search = '';
+      }
     },
 
     handleKeyInput(keyCode) {
