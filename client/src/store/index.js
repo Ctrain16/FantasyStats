@@ -2,6 +2,8 @@ import { createStore } from 'vuex';
 
 export default createStore({
   state: {
+    mobile: false,
+
     positions: ['Skaters', 'C', 'L', 'R', 'D', 'G'],
     players: [],
     teams: [],
@@ -39,6 +41,10 @@ export default createStore({
     },
     setTeams(state, teams) {
       state.teams = teams;
+    },
+
+    updateMobile(state, value) {
+      state.mobile = value;
     },
 
     updateSeason(state, season) {

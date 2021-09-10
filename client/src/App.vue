@@ -15,6 +15,7 @@
 <script>
 import Header from './components/header.vue';
 import Footer from './components/footer.vue';
+import { mapState } from 'vuex';
 
 export default {
   name: 'App',
@@ -28,13 +29,24 @@ export default {
       loadingMessage: 'Loading.'
     };
   },
+  computed: mapState(['mobile']),
   async mounted() {
     let dotCount = 1;
     const loadingInterval = setInterval(() => {
       dotCount = dotCount === 3 ? 1 : dotCount + 1;
       this.loadingMessage = 'Loading' + '.'.repeat(dotCount);
     }, 250);
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth <= 769 && !this.mobile) {
+        this.$store.commit('updateMobile', true);
+      } else if (window.innerWidth > 769 && this.mobile) {
+        this.$store.commit('updateMobile', false);
+      }
+    });
+    window.dispatchEvent(new Event('resize'));
     await this.$store.dispatch('initialize');
+
     this.storeIntialized = true;
     clearInterval(loadingInterval);
   }

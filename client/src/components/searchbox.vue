@@ -99,18 +99,21 @@ export default {
   /*the container must be positioned relative:*/
   position: relative;
   display: flex;
-  width: 100%;
+
   height: 60px;
-  padding: 10px 25px;
+  width: 50vw;
   max-width: 400px;
+
+  padding: 10px 25px;
 }
 
 .searchbox {
-  margin: 10px;
+  margin: 5px;
   padding-left: 20px;
 
   height: 40px;
-  width: 400px;
+  width: 50vw;
+  max-width: 400px;
 
   border: 1px solid var(--color-blue);
   border-radius: 5px;
@@ -124,14 +127,14 @@ export default {
   color: black;
 
   z-index: 99;
-  top: 60px;
+  top: 50px;
   left: 0;
   right: 0;
 }
 
 .search-suggestion-items div {
   padding: 10px;
-  margin: 0px 10px 0px 10px;
+  margin: 0px 5px 0px 5px;
   cursor: pointer;
 
   box-shadow: 0px 4px 4px 0px rgb(51, 51, 51);
