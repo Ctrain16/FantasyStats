@@ -202,6 +202,11 @@ const updateDb = async function () {
     );
   }
 
+  if (!(await playersCollection.indexExists('fullname_text'))) {
+    await playersCollection.createIndex({ fullName: 'text' });
+    console.log(`[INFO]: Fullname index created.`);
+  }
+
   await mongoClient.close();
   console.log(`[SUCCESS]: Player database was successfully updated`);
 };
