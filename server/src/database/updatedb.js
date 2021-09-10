@@ -1,11 +1,11 @@
 import fetch from 'node-fetch';
 import { MongoClient } from 'mongodb';
-import Player from './player.js';
+import Player from '../util/player.js';
 import {
   calcSkaterAdvancedStats,
   calcGoalieAdvancedStats,
-} from './advancedstats.js';
-import { fetchTeamAbbreviations } from './fetchteamabbreviation.js';
+} from '../util/advancedstats.js';
+import { fetchTeamAbbreviations } from '../util/fetchteamabbreviation.js';
 
 const tryCatchForAsync = async function (promise) {
   try {

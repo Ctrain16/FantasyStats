@@ -7,8 +7,8 @@ import { MongoClient } from 'mongodb';
 
 dotenv.config();
 
-import { updateDb } from './util/updatedb.js';
-import { fetchPlayerIds } from './util/fetchplayerids.js';
+import { updateDb } from './database/updatedb.js';
+import { fetchPlayerIds } from './database/fetchplayerids.js';
 
 const LATEST_SEASON = '20202021';
 
