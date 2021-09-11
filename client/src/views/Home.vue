@@ -19,70 +19,76 @@
       ></Filter>
     </div>
 
-    <p v-if="sortedPlayers.length === 0">Error fetching skaters</p>
-    <div id="player-chart">
-      <table id="player-stats-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Player</th>
-            <th>Season</th>
-            <th>Pos</th>
-            <th>Team</th>
-            <th
-              v-for="(stat, i) in playerStatCategories"
+    <div v-if="!loading">
+      <p v-if="sortedPlayers.length === 0">Error fetching skaters</p>
+      <div id="player-chart">
+        <table id="player-stats-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Player</th>
+              <th>Season</th>
+              <th>Pos</th>
+              <th>Team</th>
+              <th
+                v-for="(stat, i) in playerStatCategories"
+                :key="i"
+                @click="selectSortColumn"
+              >
+                {{ stat }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(player, i) in playersOnPage"
               :key="i"
-              @click="selectSortColumn"
+              @click="this.$router.push(`/player/${player._id}`)"
             >
-              {{ stat }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(player, i) in playersOnPage"
-            :key="i"
-            @click="this.$router.push(`/player/${player._id}`)"
-          >
-            <td>{{ i + 1 + (currentPage - 1) * playersPerPage }}</td>
-            <td>{{ player.fullName }}</td>
-            <td>{{ season }}</td>
-            <td>{{ player.position }}</td>
-            <td>{{ playerTeam(player) }}</td>
-            <td
-              v-for="(stat, name) in playerStats(i)"
-              :key="name"
-              :class="{
-                'active-column': name === sortColumn
-              }"
-            >
-              {{ stat }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              <td>{{ i + 1 + (currentPage - 1) * playersPerPage }}</td>
+              <td>{{ player.fullName }}</td>
+              <td>{{ season }}</td>
+              <td>{{ player.position }}</td>
+              <td>{{ playerTeam(player) }}</td>
+              <td
+                v-for="(stat, name) in playerStats(i)"
+                :key="name"
+                :class="{
+                  'active-column': name === sortColumn
+                }"
+              >
+                {{ stat }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <a
+          v-for="page in numberOfPages"
+          :key="page"
+          @click="currentPage = page + 1"
+          :class="
+            currentPage === page + 1 ? 'page-button active' : 'page-button'
+          "
+          href="#"
+        >
+          {{ page + 1 }}
+        </a>
+      </div>
     </div>
-    <div class="pagination">
-      <a
-        v-for="page in numberOfPages"
-        :key="page"
-        @click="currentPage = page + 1"
-        :class="currentPage === page + 1 ? 'page-button active' : 'page-button'"
-        href="#"
-      >
-        {{ page + 1 }}
-      </a>
-    </div>
+    <Loading v-else></Loading>
   </div>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex';
 import Filter from '../components/filter.vue';
+import Loading from '../components/loading.vue';
 
 export default {
   name: 'Home',
-  components: { Filter },
+  components: { Filter, Loading },
   data() {
     return {
       sortedPlayers: [],
@@ -94,6 +100,8 @@ export default {
       sortColumn: 'P',
       sortDescending: true,
       lastSortColumnIndex: 0,
+
+      loading: false,
 
       // filters
       position: 'Skaters',
@@ -121,6 +129,7 @@ export default {
     },
 
     tempSeason: async function(newSeason) {
+      this.loading = true;
       await this.$store.dispatch('updatePlayers', {
         season: `${newSeason.slice(0, 4)}20${newSeason.slice(-2)}`
       });
@@ -139,6 +148,7 @@ export default {
 
       this.sortPlayers();
       this.filterPlayers();
+      this.loading = false;
     }
   },
   methods: {
