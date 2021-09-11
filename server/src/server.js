@@ -87,40 +87,6 @@ app.post('/api/players', async (req, res, next) => {
   }
 });
 
-app.post('/api/skaters', async (req, res, next) => {
-  try {
-    let { season } = req.body;
-    if (season === 'latest') season = LATEST_SEASON;
-
-    const cursor = playersCollection.find({
-      position: { $ne: 'G' },
-      statistics: { $elemMatch: { season: season } },
-    });
-    const skaters = await cursor.toArray();
-
-    res.send(skaters);
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/goalies', async (req, res, next) => {
-  try {
-    let { season } = req.body;
-    if (season === 'latest') season = LATEST_SEASON;
-
-    const cursor = playersCollection.find({
-      position: { $eq: 'G' },
-      statistics: { $elemMatch: { season: season } },
-    });
-    const goalies = await cursor.toArray();
-
-    res.send(goalies);
-  } catch (error) {
-    next(error);
-  }
-});
-
 app.post('/api/player', async (req, res, next) => {
   try {
     const { id } = req.body;
