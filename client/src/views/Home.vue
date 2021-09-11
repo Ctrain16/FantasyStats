@@ -14,14 +14,14 @@
       <Filter
         :label="'Season'"
         :options="seasons"
-        :selected="tempSeason"
-        v-model="tempSeason"
+        :selected="season"
+        v-model="season"
       ></Filter>
     </div>
 
     <div v-if="!loading">
-      <p v-if="sortedPlayers.length === 0">Error fetching skaters</p>
-      <div id="player-chart">
+      <p v-if="players.length === 0">Error fetching skaters</p>
+      <div v-else id="player-chart">
         <table id="player-stats-table">
           <thead>
             <tr>
@@ -41,17 +41,17 @@
           </thead>
           <tbody>
             <tr
-              v-for="(player, i) in playersOnPage"
+              v-for="(player, i) in players"
               :key="i"
               @click="this.$router.push(`/player/${player._id}`)"
             >
               <td>{{ i + 1 + (currentPage - 1) * playersPerPage }}</td>
               <td>{{ player.fullName }}</td>
-              <td>{{ season }}</td>
+              <td>{{ formatSeason(player.statistics.season) }}</td>
               <td>{{ player.position }}</td>
-              <td>{{ playerTeam(player) }}</td>
+              <td>{{ player.statistics.team.abbreviation }}</td>
               <td
-                v-for="(stat, name) in playerStats(i)"
+                v-for="(stat, name) in player.statistics.stat"
                 :key="name"
                 :class="{
                   'active-column': name === sortColumn
@@ -63,17 +63,16 @@
           </tbody>
         </table>
       </div>
+      -
       <div class="pagination">
         <a
           v-for="page in numberOfPages"
           :key="page"
-          @click="currentPage = page + 1"
-          :class="
-            currentPage === page + 1 ? 'page-button active' : 'page-button'
-          "
+          @click="currentPage = page"
+          :class="currentPage === page ? 'page-button active' : 'page-button'"
           href="#"
         >
-          {{ page + 1 }}
+          {{ page }}
         </a>
       </div>
     </div>
@@ -82,7 +81,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 import Filter from '../components/filter.vue';
 import Loading from '../components/loading.vue';
 
@@ -91,10 +90,10 @@ export default {
   components: { Filter, Loading },
   data() {
     return {
-      sortedPlayers: [],
-      filteredPlayers: [],
+      players: [],
 
       currentPage: 1,
+      numberOfPages: null,
       playersPerPage: 50,
 
       sortColumn: 'P',
@@ -106,99 +105,40 @@ export default {
       // filters
       position: 'Skaters',
       team: 'All',
-      tempSeason: '2020-21'
+      season: '2020-21'
     };
   },
   watch: {
     position: function(newPosition, oldPosition) {
-      this.filterPlayers();
-      if (newPosition !== 'G' && oldPosition !== 'G') return;
-
-      if (newPosition === 'G') {
-        this.sortedPlayers = this.goalies;
-        this.sortColumn = 'SV%';
-      } else {
-        this.sortedPlayers = this.skaters;
+      if (newPosition === 'G') this.sortColumn = 'SV%';
+      else if (newPosition !== 'G' && oldPosition === 'G')
         this.sortColumn = 'P';
-      }
-      this.sortPlayers();
+      this.loadPlayers();
     },
 
     team: function() {
-      this.filterPlayers();
+      this.loadPlayers();
     },
 
-    tempSeason: async function(newSeason) {
-      this.loading = true;
-      await this.$store.dispatch('updatePlayers', {
-        season: `${newSeason.slice(0, 4)}20${newSeason.slice(-2)}`
-      });
+    season: function() {
+      this.loadPlayers();
+    },
 
-      if (this.position === 'G') {
-        this.sortedPlayers = this.goalies;
-        this.sortColumn = 'SV%';
-      } else {
-        this.sortedPlayers = this.skaters;
-        this.sortColumn = 'P';
-      }
+    sortColumn: function() {
+      this.loadPlayers();
+    },
 
-      this.currentPage = 1;
-      this.sortDescending = true;
-      this.$store.commit('updateSeason', newSeason);
+    sortDescending: function() {
+      this.loadPlayers();
+    },
 
-      this.sortPlayers();
-      this.filterPlayers();
-      this.loading = false;
+    currentPage: function() {
+      this.loadPlayers();
     }
   },
   methods: {
-    playerStats(index) {
-      return this.playerStatsSeason(
-        this.filteredPlayers[
-          index + (this.currentPage - 1) * this.playersPerPage
-        ]
-      ).stat;
-    },
-
-    playerStatsSeason(player) {
-      return player.statistics.find(
-        year =>
-          year.season === `${this.season.slice(0, 4)}20${this.season.slice(-2)}`
-      );
-    },
-
-    playerTeam(player) {
-      return this.playerStatsSeason(player).team.abbreviation;
-    },
-
-    filterPlayers() {
-      if (this.position === 'G') {
-        if (this.team !== 'All')
-          this.filteredPlayers = this.sortedPlayers.filter(
-            goalie => this.playerStatsSeason(goalie).team.name === this.team
-          );
-        this.filteredPlayers = this.sortedPlayers.filter(player => {
-          return this.playerStatsSeason(player);
-        });
-      }
-
-      this.filteredPlayers = this.sortedPlayers
-        .filter(skater => {
-          if (this.team !== 'All' && this.position !== 'Skaters') {
-            return (
-              this.playerStatsSeason(skater).team.name === this.team &&
-              skater.position === this.position
-            );
-          } else if (this.team !== 'All')
-            return this.playerStatsSeason(skater).team.name === this.team;
-          else if (this.position !== 'Skaters')
-            return skater.position === this.position;
-
-          return skater;
-        })
-        .filter(player => {
-          return this.playerStatsSeason(player);
-        });
+    formatSeason(season) {
+      return `${season.slice(0, 4)}-${season.slice(-2)}`;
     },
 
     selectSortColumn(e) {
@@ -207,7 +147,6 @@ export default {
       const sortColumnIndex = [...tableHeaders].findIndex(
         header => header.textContent === e.target.textContent
       );
-
       [...document.getElementById('player-stats-table').rows].forEach(row => {
         row.cells[this.lastSortColumnIndex].classList.remove('active-column');
         const sortedColumn = row.cells[sortColumnIndex];
@@ -215,58 +154,48 @@ export default {
           sortedColumn.classList.add('active-column');
       });
       this.lastSortColumnIndex = sortColumnIndex;
-
       this.sortDescending =
         this.sortColumn === e.target.textContent ? !this.sortDescending : true;
       this.sortColumn = e.target.textContent;
       this.currentPage = 1;
-      this.sortPlayers();
-      this.$forceUpdate();
     },
 
-    sortPlayers() {
-      this.sortedPlayers = this.sortedPlayers.sort((p1, p2) => {
-        const p1stats = String(
-          this.playerStatsSeason(p1).stat[this.sortColumn]
-        ).replace(':', '');
-        const p2stats = String(
-          this.playerStatsSeason(p2).stat[this.sortColumn]
-        ).replace(':', '');
+    async loadPlayers() {
+      this.loading = true;
 
-        return this.sortDescending ? p2stats - p1stats : p1stats - p2stats;
-      });
-      this.filterPlayers();
+      const data = await (
+        await fetch('api/players', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            season: `${this.season.slice(0, 4)}20${this.season.slice(-2)}`,
+            team: this.team,
+            position: this.position,
+            sortedBy: this.sortColumn,
+            order: this.sortDescending ? 'desc' : 'asc',
+            page: this.currentPage
+          })
+        })
+      ).json();
+
+      this.players = data.players;
+      this.numberOfPages = data.pagination.numberOfPages;
+      this.playersPerPage = data.pagination.pageLength;
+
+      this.loading = false;
     }
   },
   computed: {
-    ...mapGetters(['goalies', 'skaters']),
-    ...mapState(['players', 'teams', 'positions', 'seasons', 'season']),
+    ...mapState(['teams', 'positions', 'seasons']),
 
     playerStatCategories() {
-      if (this.position !== 'G')
-        return Object.keys(this.skaters[0].statistics.slice(-1)[0].stat);
-      else return Object.keys(this.goalies[0].statistics.slice(-1)[0].stat);
-    },
-
-    numberOfPages() {
-      return Array.from(
-        Array(
-          Math.ceil(this.filteredPlayers.length / this.playersPerPage)
-        ).keys()
-      );
-    },
-
-    playersOnPage() {
-      return this.filteredPlayers.slice(
-        (this.currentPage - 1) * this.playersPerPage,
-        this.currentPage * this.playersPerPage
-      );
+      return Object.keys(this.players[0].statistics.stat);
     }
   },
   async mounted() {
-    this.sortedPlayers = this.skaters;
-    this.tempSeason = this.season;
-    this.sortPlayers();
+    await this.loadPlayers();
   }
 };
 </script>

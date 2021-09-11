@@ -5,7 +5,6 @@ export default createStore({
     mobile: false,
 
     positions: ['Skaters', 'C', 'L', 'R', 'D', 'G'],
-    players: [],
     teams: [],
     seasons: [
       '2020-21',
@@ -27,66 +26,18 @@ export default createStore({
     ],
     season: '2020-21'
   },
-  getters: {
-    goalies: state => {
-      return state.players.filter(player => player.position === 'G');
-    },
-    skaters: state => {
-      return state.players.filter(player => player.position !== 'G');
-    }
-  },
   mutations: {
-    setPlayers(state, players) {
-      state.players = players;
-    },
     setTeams(state, teams) {
       state.teams = teams;
     },
-
     updateMobile(state, value) {
       state.mobile = value;
-    },
-
-    updateSeason(state, season) {
-      state.season = season;
     }
   },
   actions: {
     async initialize({ commit }) {
-      const players = await (
-        await fetch('api/players', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            season: 'latest'
-          })
-        })
-      ).json();
       const teams = await (await fetch('api/teams')).json();
       commit('setTeams', teams);
-      commit('setPlayers', players);
-    },
-
-    async updatePlayers({ commit }, { season }) {
-      try {
-        const players = await (
-          await fetch('api/players', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              season: season
-            })
-          })
-        ).json();
-
-        commit('setPlayers', players);
-      } catch (error) {
-        console.error('Failed to update players.');
-      }
     }
   },
   modules: {}

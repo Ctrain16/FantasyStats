@@ -37,8 +37,8 @@ export default {
       }
     });
     window.dispatchEvent(new Event('resize'));
-    await this.$store.dispatch('initialize');
 
+    await this.$store.dispatch('initialize');
     this.storeIntialized = true;
   }
 };

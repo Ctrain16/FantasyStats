@@ -11,6 +11,7 @@ import { updateDb } from './database/updatedb.js';
 import { fetchPlayerIds } from './database/fetchplayerids.js';
 
 const LATEST_SEASON = '20202021';
+const PAGE_SIZE = 50;
 
 const app = express();
 app.use(express.json());
@@ -35,15 +36,52 @@ app.get('/', (req, res, next) => {
 
 app.post('/api/players', async (req, res, next) => {
   try {
-    let { season } = req.body;
+    let { season, team, position, sortedBy, order, page } = req.body;
     if (season === 'latest') season = LATEST_SEASON;
 
     const cursor = playersCollection.find({
       statistics: { $elemMatch: { season: season } },
     });
-    const players = await cursor.toArray();
 
-    res.send(players);
+    const players = (await cursor.toArray())
+      .map((player) => {
+        player.statistics = player.statistics.find((year) => {
+          return year.season === season;
+        });
+        return player;
+      })
+      .filter((player) => {
+        if (team.toLowerCase() !== 'all')
+          return player.statistics.team.name === team;
+        return player;
+      })
+      .filter((player) => {
+        if (position.toLowerCase() !== 'skaters')
+          return player.position === position;
+        return player.position !== 'G';
+      })
+      .sort((p1, p2) => {
+        const p1stat = p1.statistics.stat[sortedBy];
+        const p2stat = p2.statistics.stat[sortedBy];
+
+        return order === 'desc' ? p2stat - p1stat : p1stat - p2stat;
+      });
+
+    const playersOnPage = players.slice(
+      (page - 1) * PAGE_SIZE,
+      page * PAGE_SIZE
+    );
+
+    const numPages = Math.ceil(players.length / PAGE_SIZE);
+
+    res.send({
+      players: playersOnPage,
+      pagination: {
+        currentPage: page,
+        numberOfPages: numPages,
+        pageLength: PAGE_SIZE,
+      },
+    });
   } catch (error) {
     next(error);
   }
