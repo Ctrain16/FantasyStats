@@ -340,6 +340,9 @@ export default {
 
 .filters {
   display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
   margin-top: 20px;
 }
 </style>
