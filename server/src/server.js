@@ -131,9 +131,38 @@ app.get('/api/search/:query', async (req, res, next) => {
 });
 
 // Database Routes
-// TODO need to protect these routes
+const reject = (res) => {
+  res.setHeader('www-authenticate', 'Basic');
+  res.sendStatus(401);
+};
+
+const isAuthorized = function (req) {
+  const authorization = req.headers.authorization;
+
+  if (!authorization) return false;
+
+  const [username, password] = Buffer.from(
+    authorization.replace('Basic ', ''),
+    'base64'
+  )
+    .toString()
+    .split(':');
+
+  if (
+    !(
+      username === process.env.API_USERNAME &&
+      password === process.env.API_PASSWORD
+    )
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
 app.get('/api/updateIds', async (req, res, next) => {
   try {
+    if (!isAuthorized(req)) return reject(res);
     await fetchPlayerIds();
     res.send('Succesfully updated player ids.');
   } catch (error) {
@@ -143,6 +172,7 @@ app.get('/api/updateIds', async (req, res, next) => {
 
 app.get('/api/updatedb', async (req, res, next) => {
   try {
+    if (!isAuthorized(req)) return reject(res);
     await updateDb();
     res.send('Succesfully updated database.');
   } catch (error) {
