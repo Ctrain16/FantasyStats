@@ -165,7 +165,7 @@ export default {
       if (this.position === 'G') {
         if (this.team !== 'All')
           this.filteredPlayers = this.sortedPlayers.filter(
-            goalie => goalie.team.name === this.team
+            goalie => this.playerStatsSeason(goalie).team.name === this.team
           );
         this.filteredPlayers = this.sortedPlayers.filter(player => {
           return this.playerStatsSeason(player);
@@ -176,10 +176,11 @@ export default {
         .filter(skater => {
           if (this.team !== 'All' && this.position !== 'Skaters') {
             return (
-              skater.team.name === this.team &&
+              this.playerStatsSeason(skater).team.name === this.team &&
               skater.position === this.position
             );
-          } else if (this.team !== 'All') return skater.team.name === this.team;
+          } else if (this.team !== 'All')
+            return this.playerStatsSeason(skater).team.name === this.team;
           else if (this.position !== 'Skaters')
             return skater.position === this.position;
 
