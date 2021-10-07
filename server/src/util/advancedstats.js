@@ -2,15 +2,15 @@ const fantasyPointValues = {
   assist: 3,
   goal: 4,
   hit: 0.25,
-  pim: 0.5,
+  pim: 0.25,
   plusMinus: 0.25,
-  shg: 2,
+  shg: 1,
   shot: 0.5,
   ppp: 1,
   ga: -1,
   save: 0.25,
-  so: 5,
-  win: 5,
+  so: 3,
+  win: 4,
 };
 
 const calcSkaterAdvancedStats = function (stats) {
